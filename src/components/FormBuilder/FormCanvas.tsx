@@ -1,4 +1,3 @@
-
 import { FormCanvasProps, FormElement } from "./types";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -16,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const FormCanvas = ({ elements, setFormConfig }: FormCanvasProps) => {
+const FormCanvas = ({ elements, setFormConfig, onSelectElement, selectedElement }: FormCanvasProps) => {
   const { toast } = useToast();
 
   const handleDelete = (id: string) => {
@@ -148,7 +147,13 @@ const FormCanvas = ({ elements, setFormConfig }: FormCanvasProps) => {
       ) : (
         <div className="space-y-4">
           {elements.map((element) => (
-            <Card key={element.id} className="p-4">
+            <Card 
+              key={element.id} 
+              className={`p-4 cursor-pointer transition-colors ${
+                selectedElement?.id === element.id ? 'ring-2 ring-primary' : ''
+              }`}
+              onClick={() => onSelectElement(element)}
+            >
               <div className="flex justify-between items-start gap-4">
                 <div className="flex-1 space-y-2">
                   {!["h1", "h2", "h3", "p", "divider"].includes(element.type) && (
@@ -159,7 +164,10 @@ const FormCanvas = ({ elements, setFormConfig }: FormCanvasProps) => {
                 <Button
                   variant="destructive"
                   size="icon"
-                  onClick={() => handleDelete(element.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(element.id);
+                  }}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

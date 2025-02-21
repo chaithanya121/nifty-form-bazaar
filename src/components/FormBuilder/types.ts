@@ -17,6 +17,15 @@ export interface FormElement {
   };
   tooltip?: string;
   nestedData?: boolean;
+  name?: string;
+  submitData?: boolean;
+  autoFloat?: "Default" | "Off";
+  decorators?: {
+    required?: boolean;
+    readonly?: boolean;
+    disabled?: boolean;
+  };
+  inputType?: string;
 }
 
 export interface FormConfig {
@@ -52,8 +61,16 @@ export interface DragStartProps {
 export interface FormCanvasProps {
   elements: FormElement[];
   setFormConfig: React.Dispatch<React.SetStateAction<FormConfig>>;
+  onSelectElement: (element: FormElement) => void;
+  selectedElement?: FormElement;
 }
 
 export interface FormPreviewProps {
   formConfig: FormConfig;
+}
+
+export interface ElementSettingsProps {
+  element: FormElement;
+  onUpdate: (updatedElement: FormElement) => void;
+  onClose: () => void;
 }

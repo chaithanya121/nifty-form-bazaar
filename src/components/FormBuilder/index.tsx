@@ -5,6 +5,7 @@ import { FormElement, FormConfig } from "./types";
 import FormElementLibrary from "./FormElementLibrary";
 import FormCanvas from "./FormCanvas";
 import FormPreview from "./FormPreview";
+import ElementSettings from "./ElementSettings";
 import { Button } from "@/components/ui/button";
 import { Eye, Code } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -15,29 +16,30 @@ const DEFAULT_CONFIG: FormConfig = {
   settings: {
     preview: {
       width: "Full",
-      nesting: true
+      nesting: true,
     },
     validation: {
-      liveValidation: "Default"
+      liveValidation: "Default",
     },
     layout: {
       size: "Default",
       columns: {
         default: true,
         tablet: false,
-        desktop: false
+        desktop: false,
       },
       labels: "Default",
       placeholders: "Default",
       errors: "Default",
-      messages: "Default"
-    }
-  }
+      messages: "Default",
+    },
+  },
 };
 
 const FormBuilder = () => {
   const [formConfig, setFormConfig] = useState<FormConfig>(DEFAULT_CONFIG);
   const [previewMode, setPreviewMode] = useState(false);
+  const [selectedElement, setSelectedElement] = useState<FormElement | undefined>();
   const { toast } = useToast();
 
   const handleDragStart = (e: DragEvent<HTMLDivElement>, elementType: string) => {
@@ -55,6 +57,7 @@ const FormBuilder = () => {
       placeholder: `Enter ${elementType}`,
       nestedData: false,
       description: "",
+      name: elementType.toLowerCase(),
     };
 
     setFormConfig((prev) => ({
@@ -70,6 +73,19 @@ const FormBuilder = () => {
 
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+  };
+
+  const handleElementSelect = (element: FormElement) => {
+    setSelectedElement(element);
+  };
+
+  const handleElementUpdate = (updatedElement: FormElement) => {
+    setFormConfig((prev) => ({
+      ...prev,
+      elements: prev.elements.map((el) =>
+        el.id === updatedElement.id ? updatedElement : el
+      ),
+    }));
   };
 
   return (
@@ -111,10 +127,22 @@ const FormBuilder = () => {
                 <FormCanvas
                   elements={formConfig.elements}
                   setFormConfig={setFormConfig}
+                  onSelectElement={handleElementSelect}
+                  selectedElement={selectedElement}
                 />
               </Card>
               <Card className="col-span-3 bg-gray-800 border-gray-700 p-4">
-                {/* Settings Panel - Will be implemented next */}
+                {selectedElement ? (
+                  <ElementSettings
+                    element={selectedElement}
+                    onUpdate={handleElementUpdate}
+                    onClose={() => setSelectedElement(undefined)}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-gray-400">
+                    Select an element to edit its properties
+                  </div>
+                )}
               </Card>
             </>
           ) : (
