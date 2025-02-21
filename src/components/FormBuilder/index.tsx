@@ -74,29 +74,37 @@ const FormBuilder = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <div className="container mx-auto p-4 space-y-4">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Form Builder</h1>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setPreviewMode(!previewMode)}
-              className="gap-2"
-            >
+      <div className="container mx-auto p-4">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-bold">Create account</h1>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span>Theme</span>
+              <Button variant="outline" size="sm">
+                Dark
+              </Button>
+            </div>
+            <div className="flex items-center gap-2">
+              <span>Language</span>
+              <Button variant="outline" size="sm">
+                English
+              </Button>
+            </div>
+            <Button variant="outline" onClick={() => setPreviewMode(!previewMode)} className="gap-2">
               {previewMode ? <Code /> : <Eye />}
               {previewMode ? "Edit" : "Preview"}
             </Button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+        <div className="grid grid-cols-12 gap-4">
           {!previewMode ? (
             <>
-              <Card className="md:col-span-3 p-4 bg-gray-800 border-gray-700">
+              <Card className="col-span-3 bg-gray-800 border-gray-700 p-4">
                 <FormElementLibrary onDragStart={handleDragStart} />
               </Card>
               <Card
-                className="md:col-span-9 p-4 min-h-[500px] bg-gray-800 border-gray-700"
+                className="col-span-6 bg-gray-800 border-gray-700 p-4 min-h-[calc(100vh-10rem)]"
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
               >
@@ -105,9 +113,12 @@ const FormBuilder = () => {
                   setFormConfig={setFormConfig}
                 />
               </Card>
+              <Card className="col-span-3 bg-gray-800 border-gray-700 p-4">
+                {/* Settings Panel - Will be implemented next */}
+              </Card>
             </>
           ) : (
-            <Card className="md:col-span-12 p-4 bg-gray-800 border-gray-700">
+            <Card className="col-span-12 bg-gray-800 border-gray-700 p-4">
               <FormPreview formConfig={formConfig} />
             </Card>
           )}
