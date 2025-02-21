@@ -9,11 +9,34 @@ import { Button } from "@/components/ui/button";
 import { Eye, Code } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+const DEFAULT_CONFIG: FormConfig = {
+  name: "Create account",
+  elements: [],
+  settings: {
+    preview: {
+      width: "Full",
+      nesting: true
+    },
+    validation: {
+      liveValidation: "Default"
+    },
+    layout: {
+      size: "Default",
+      columns: {
+        default: true,
+        tablet: false,
+        desktop: false
+      },
+      labels: "Default",
+      placeholders: "Default",
+      errors: "Default",
+      messages: "Default"
+    }
+  }
+};
+
 const FormBuilder = () => {
-  const [formConfig, setFormConfig] = useState<FormConfig>({
-    name: "New Form",
-    elements: [],
-  });
+  const [formConfig, setFormConfig] = useState<FormConfig>(DEFAULT_CONFIG);
   const [previewMode, setPreviewMode] = useState(false);
   const { toast } = useToast();
 
@@ -30,6 +53,8 @@ const FormBuilder = () => {
       label: `New ${elementType}`,
       required: false,
       placeholder: `Enter ${elementType}`,
+      nestedData: false,
+      description: "",
     };
 
     setFormConfig((prev) => ({
@@ -48,43 +73,45 @@ const FormBuilder = () => {
   };
 
   return (
-    <div className="container mx-auto p-4 space-y-4">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Form Builder</h1>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setPreviewMode(!previewMode)}
-            className="gap-2"
-          >
-            {previewMode ? <Code /> : <Eye />}
-            {previewMode ? "Edit" : "Preview"}
-          </Button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-        {!previewMode ? (
-          <>
-            <Card className="md:col-span-3 p-4">
-              <FormElementLibrary onDragStart={handleDragStart} />
-            </Card>
-            <Card
-              className="md:col-span-9 p-4 min-h-[500px]"
-              onDrop={handleDrop}
-              onDragOver={handleDragOver}
+    <div className="min-h-screen bg-gray-900 text-white">
+      <div className="container mx-auto p-4 space-y-4">
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold">Form Builder</h1>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setPreviewMode(!previewMode)}
+              className="gap-2"
             >
-              <FormCanvas
-                elements={formConfig.elements}
-                setFormConfig={setFormConfig}
-              />
+              {previewMode ? <Code /> : <Eye />}
+              {previewMode ? "Edit" : "Preview"}
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+          {!previewMode ? (
+            <>
+              <Card className="md:col-span-3 p-4 bg-gray-800 border-gray-700">
+                <FormElementLibrary onDragStart={handleDragStart} />
+              </Card>
+              <Card
+                className="md:col-span-9 p-4 min-h-[500px] bg-gray-800 border-gray-700"
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+              >
+                <FormCanvas
+                  elements={formConfig.elements}
+                  setFormConfig={setFormConfig}
+                />
+              </Card>
+            </>
+          ) : (
+            <Card className="md:col-span-12 p-4 bg-gray-800 border-gray-700">
+              <FormPreview formConfig={formConfig} />
             </Card>
-          </>
-        ) : (
-          <Card className="md:col-span-12 p-4">
-            <FormPreview formConfig={formConfig} />
-          </Card>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
