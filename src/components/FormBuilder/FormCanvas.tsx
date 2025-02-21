@@ -6,6 +6,15 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const FormCanvas = ({ elements, setFormConfig }: FormCanvasProps) => {
   const { toast } = useToast();
@@ -26,6 +35,8 @@ const FormCanvas = ({ elements, setFormConfig }: FormCanvasProps) => {
       case "text":
       case "email":
       case "password":
+      case "date":
+      case "file":
         return (
           <Input
             type={element.type}
@@ -41,9 +52,87 @@ const FormCanvas = ({ elements, setFormConfig }: FormCanvasProps) => {
             required={element.required}
           />
         );
-      // Additional element types can be added here
+      case "checkbox":
+        return (
+          <div className="flex items-center space-x-2">
+            <Checkbox id={element.id} />
+            <label
+              htmlFor={element.id}
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              {element.placeholder}
+            </label>
+          </div>
+        );
+      case "radio":
+        return (
+          <RadioGroup defaultValue="default">
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="default" id={element.id} />
+              <label
+                htmlFor={element.id}
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                {element.placeholder}
+              </label>
+            </div>
+          </RadioGroup>
+        );
+      case "select":
+        return (
+          <Select>
+            <SelectTrigger>
+              <SelectValue placeholder={element.placeholder} />
+            </SelectTrigger>
+            <SelectContent>
+              {element.options?.map((option) => (
+                <SelectItem key={option} value={option}>
+                  {option}
+                </SelectItem>
+              )) || (
+                <SelectItem value="default">Add options in settings</SelectItem>
+              )}
+            </SelectContent>
+          </Select>
+        );
+      case "h1":
+        return <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">{element.label}</h1>;
+      case "h2":
+        return <h2 className="scroll-m-20 text-3xl font-semibold tracking-tight">{element.label}</h2>;
+      case "h3":
+        return <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">{element.label}</h3>;
+      case "p":
+        return <p className="leading-7 [&:not(:first-child)]:mt-6">{element.label}</p>;
+      case "divider":
+        return <hr className="my-4 border-gray-700" />;
+      case "container":
+        return <div className="p-4 border rounded-lg border-gray-700">{element.label}</div>;
+      case "2columns":
+        return (
+          <div className="grid grid-cols-2 gap-4">
+            <div className="p-4 border rounded-lg border-gray-700">Column 1</div>
+            <div className="p-4 border rounded-lg border-gray-700">Column 2</div>
+          </div>
+        );
+      case "3columns":
+        return (
+          <div className="grid grid-cols-3 gap-4">
+            <div className="p-4 border rounded-lg border-gray-700">Column 1</div>
+            <div className="p-4 border rounded-lg border-gray-700">Column 2</div>
+            <div className="p-4 border rounded-lg border-gray-700">Column 3</div>
+          </div>
+        );
+      case "4columns":
+        return (
+          <div className="grid grid-cols-4 gap-4">
+            <div className="p-4 border rounded-lg border-gray-700">Column 1</div>
+            <div className="p-4 border rounded-lg border-gray-700">Column 2</div>
+            <div className="p-4 border rounded-lg border-gray-700">Column 3</div>
+            <div className="p-4 border rounded-lg border-gray-700">Column 4</div>
+          </div>
+        );
       default:
-        return <Input placeholder="Unsupported element type" />;
+        return null;
     }
   };
 
@@ -62,7 +151,9 @@ const FormCanvas = ({ elements, setFormConfig }: FormCanvasProps) => {
             <Card key={element.id} className="p-4">
               <div className="flex justify-between items-start gap-4">
                 <div className="flex-1 space-y-2">
-                  <Label>{element.label}</Label>
+                  {!["h1", "h2", "h3", "p", "divider"].includes(element.type) && (
+                    <Label>{element.label}</Label>
+                  )}
                   {renderFormElement(element)}
                 </div>
                 <Button
