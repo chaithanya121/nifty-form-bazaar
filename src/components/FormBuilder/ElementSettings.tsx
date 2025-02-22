@@ -10,26 +10,27 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) => {
+  if (!element) return null;
+
   const handleInputChange = (field: string, value: any) => {
-    const updatedElement = { ...element };
-    if (field === "validation") {
-      updatedElement.validation = {
-        ...(updatedElement.validation || {}),
-        ...value,
-      };
-    } else {
-      updatedElement[field] = value;
-    }
-    console.log('Updated element:', updatedElement); // Debug log
+    const updatedElement = {
+      ...element,
+      [field]: value
+    };
+    console.log('Updating element field:', field, 'with value:', value);
     onUpdate(updatedElement);
   };
 
   const handleValidationChange = (field: string, value: any) => {
-    const validation = {
-      ...(element.validation || {}),
-      [field]: value,
+    const updatedElement = {
+      ...element,
+      validation: {
+        ...(element.validation || {}),
+        [field]: value
+      }
     };
-    handleInputChange("validation", validation);
+    console.log('Updating validation field:', field, 'with value:', value);
+    onUpdate(updatedElement);
   };
 
   return (
@@ -53,8 +54,8 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
             <div className="space-y-2">
               <Label>Name</Label>
               <Input
-                value={element.name || ""}
-                onChange={(e) => handleInputChange("name", e.target.value)}
+                defaultValue={element.name || ""}
+                onBlur={(e) => handleInputChange("name", e.target.value)}
                 className="bg-gray-800"
               />
             </div>
@@ -63,7 +64,7 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
               <div className="space-y-2">
                 <Label>Input Type</Label>
                 <Select 
-                  value={element.inputType || element.type}
+                  defaultValue={element.inputType || element.type}
                   onValueChange={(value) => handleInputChange("inputType", value)}
                 >
                   <SelectTrigger className="bg-gray-800">
@@ -83,8 +84,8 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
             <div className="space-y-2">
               <Label>Label</Label>
               <Input
-                value={element.label || ""}
-                onChange={(e) => handleInputChange("label", e.target.value)}
+                defaultValue={element.label || ""}
+                onBlur={(e) => handleInputChange("label", e.target.value)}
                 className="bg-gray-800"
               />
             </div>
@@ -92,8 +93,8 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
             <div className="space-y-2">
               <Label>Tooltip</Label>
               <Input
-                value={element.tooltip || ""}
-                onChange={(e) => handleInputChange("tooltip", e.target.value)}
+                defaultValue={element.tooltip || ""}
+                onBlur={(e) => handleInputChange("tooltip", e.target.value)}
                 className="bg-gray-800"
               />
             </div>
@@ -101,8 +102,8 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
             <div className="space-y-2">
               <Label>Placeholder</Label>
               <Input
-                value={element.placeholder || ""}
-                onChange={(e) => handleInputChange("placeholder", e.target.value)}
+                defaultValue={element.placeholder || ""}
+                onBlur={(e) => handleInputChange("placeholder", e.target.value)}
                 className="bg-gray-800"
               />
             </div>
@@ -110,8 +111,8 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
             <div className="space-y-2">
               <Label>Description</Label>
               <Textarea
-                value={element.description || ""}
-                onChange={(e) => handleInputChange("description", e.target.value)}
+                defaultValue={element.description || ""}
+                onBlur={(e) => handleInputChange("description", e.target.value)}
                 className="bg-gray-800"
               />
             </div>
@@ -139,7 +140,7 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
             <div className="flex items-center justify-between">
               <Label>Auto Float</Label>
               <Select
-                value={element.autoFloat || "Default"}
+                defaultValue={element.autoFloat || "Default"}
                 onValueChange={(value) => handleInputChange("autoFloat", value)}
               >
                 <SelectTrigger className="w-[120px] bg-gray-800">
@@ -170,8 +171,8 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
                   <Label>Min Length</Label>
                   <Input
                     type="number"
-                    value={element.validation?.minLength || ""}
-                    onChange={(e) => handleValidationChange("minLength", parseInt(e.target.value) || undefined)}
+                    defaultValue={element.validation?.minLength || ""}
+                    onBlur={(e) => handleValidationChange("minLength", parseInt(e.target.value) || undefined)}
                     className="bg-gray-800"
                   />
                 </div>
@@ -180,8 +181,8 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
                   <Label>Max Length</Label>
                   <Input
                     type="number"
-                    value={element.validation?.maxLength || ""}
-                    onChange={(e) => handleValidationChange("maxLength", parseInt(e.target.value) || undefined)}
+                    defaultValue={element.validation?.maxLength || ""}
+                    onBlur={(e) => handleValidationChange("maxLength", parseInt(e.target.value) || undefined)}
                     className="bg-gray-800"
                   />
                 </div>
