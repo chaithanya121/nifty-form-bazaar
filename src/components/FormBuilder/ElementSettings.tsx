@@ -11,7 +11,27 @@ import { Button } from "@/components/ui/button";
 
 const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) => {
   const handleInputChange = (field: string, value: any) => {
-    onUpdate({ ...element, [field]: value });
+    const updatedElement = { ...element };
+    
+    // Handle nested validation properties
+    if (field === "validation") {
+      updatedElement.validation = {
+        ...(updatedElement.validation || {}),
+        ...value,
+      };
+    } else {
+      updatedElement[field] = value;
+    }
+    
+    onUpdate(updatedElement);
+  };
+
+  const handleValidationChange = (field: string, value: any) => {
+    const validation = {
+      ...(element.validation || {}),
+      [field]: value,
+    };
+    handleInputChange("validation", validation);
   };
 
   return (
@@ -117,7 +137,6 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
         </TabsContent>
 
         <TabsContent value="layout" className="space-y-4">
-          {/* Layout settings */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <Label>Auto Float</Label>
@@ -138,7 +157,6 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
         </TabsContent>
 
         <TabsContent value="validation" className="space-y-4">
-          {/* Validation settings */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <Label>Required</Label>
@@ -155,12 +173,7 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
                   <Input
                     type="number"
                     value={element.validation?.minLength || ""}
-                    onChange={(e) =>
-                      handleInputChange("validation", {
-                        ...element.validation,
-                        minLength: parseInt(e.target.value) || undefined,
-                      })
-                    }
+                    onChange={(e) => handleValidationChange("minLength", parseInt(e.target.value) || undefined)}
                     className="bg-gray-800"
                   />
                 </div>
@@ -170,12 +183,7 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
                   <Input
                     type="number"
                     value={element.validation?.maxLength || ""}
-                    onChange={(e) =>
-                      handleInputChange("validation", {
-                        ...element.validation,
-                        maxLength: parseInt(e.target.value) || undefined,
-                      })
-                    }
+                    onChange={(e) => handleValidationChange("maxLength", parseInt(e.target.value) || undefined)}
                     className="bg-gray-800"
                   />
                 </div>
