@@ -12,8 +12,6 @@ import { Button } from "@/components/ui/button";
 const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) => {
   const handleInputChange = (field: string, value: any) => {
     const updatedElement = { ...element };
-    
-    // Handle nested validation properties
     if (field === "validation") {
       updatedElement.validation = {
         ...(updatedElement.validation || {}),
@@ -22,7 +20,7 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
     } else {
       updatedElement[field] = value;
     }
-    
+    console.log('Updated element:', updatedElement); // Debug log
     onUpdate(updatedElement);
   };
 
@@ -85,7 +83,7 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
             <div className="space-y-2">
               <Label>Label</Label>
               <Input
-                value={element.label}
+                value={element.label || ""}
                 onChange={(e) => handleInputChange("label", e.target.value)}
                 className="bg-gray-800"
               />
@@ -161,7 +159,7 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
             <div className="flex items-center justify-between">
               <Label>Required</Label>
               <Switch
-                checked={element.required}
+                checked={element.required || false}
                 onCheckedChange={(checked) => handleInputChange("required", checked)}
               />
             </div>
