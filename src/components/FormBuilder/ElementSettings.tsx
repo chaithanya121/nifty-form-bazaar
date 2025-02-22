@@ -13,6 +13,7 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
   if (!element) return null;
 
   const handleInputChange = (field: string, value: any) => {
+    // Create a new object to avoid mutation
     const updatedElement = {
       ...element,
       [field]: value
@@ -22,6 +23,7 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
   };
 
   const handleValidationChange = (field: string, value: any) => {
+    // Create a new object to avoid mutation
     const updatedElement = {
       ...element,
       validation: {
@@ -54,7 +56,8 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
             <div className="space-y-2">
               <Label>Name</Label>
               <Input
-                value={element.name || ""}
+                type="text"
+                value={element.name ?? ""}
                 onChange={(e) => handleInputChange("name", e.target.value)}
                 className="bg-gray-800"
               />
@@ -64,7 +67,7 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
               <div className="space-y-2">
                 <Label>Input Type</Label>
                 <Select 
-                  value={element.inputType || element.type}
+                  value={element.inputType ?? element.type}
                   onValueChange={(value) => handleInputChange("inputType", value)}
                 >
                   <SelectTrigger className="bg-gray-800">
@@ -84,7 +87,8 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
             <div className="space-y-2">
               <Label>Label</Label>
               <Input
-                value={element.label || ""}
+                type="text"
+                value={element.label ?? ""}
                 onChange={(e) => handleInputChange("label", e.target.value)}
                 className="bg-gray-800"
               />
@@ -93,7 +97,8 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
             <div className="space-y-2">
               <Label>Tooltip</Label>
               <Input
-                value={element.tooltip || ""}
+                type="text"
+                value={element.tooltip ?? ""}
                 onChange={(e) => handleInputChange("tooltip", e.target.value)}
                 className="bg-gray-800"
               />
@@ -102,7 +107,8 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
             <div className="space-y-2">
               <Label>Placeholder</Label>
               <Input
-                value={element.placeholder || ""}
+                type="text"
+                value={element.placeholder ?? ""}
                 onChange={(e) => handleInputChange("placeholder", e.target.value)}
                 className="bg-gray-800"
               />
@@ -111,7 +117,7 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
             <div className="space-y-2">
               <Label>Description</Label>
               <Textarea
-                value={element.description || ""}
+                value={element.description ?? ""}
                 onChange={(e) => handleInputChange("description", e.target.value)}
                 className="bg-gray-800"
               />
@@ -120,7 +126,7 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
             <div className="flex items-center justify-between">
               <Label>Submit Data</Label>
               <Switch
-                checked={element.submitData || false}
+                checked={element.submitData ?? false}
                 onCheckedChange={(checked) => handleInputChange("submitData", checked)}
               />
             </div>
@@ -128,7 +134,7 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
             <div className="flex items-center justify-between">
               <Label>Nested Data</Label>
               <Switch
-                checked={element.nestedData || false}
+                checked={element.nestedData ?? false}
                 onCheckedChange={(checked) => handleInputChange("nestedData", checked)}
               />
             </div>
@@ -140,7 +146,7 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
             <div className="flex items-center justify-between">
               <Label>Auto Float</Label>
               <Select
-                value={element.autoFloat || "Default"}
+                value={element.autoFloat ?? "Default"}
                 onValueChange={(value) => handleInputChange("autoFloat", value)}
               >
                 <SelectTrigger className="w-[120px] bg-gray-800">
@@ -160,7 +166,7 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
             <div className="flex items-center justify-between">
               <Label>Required</Label>
               <Switch
-                checked={element.required || false}
+                checked={element.required ?? false}
                 onCheckedChange={(checked) => handleInputChange("required", checked)}
               />
             </div>
@@ -171,7 +177,7 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
                   <Label>Min Length</Label>
                   <Input
                     type="number"
-                    value={element.validation?.minLength || ""}
+                    value={element.validation?.minLength ?? ""}
                     onChange={(e) => handleValidationChange("minLength", parseInt(e.target.value) || undefined)}
                     className="bg-gray-800"
                   />
@@ -181,7 +187,7 @@ const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) =
                   <Label>Max Length</Label>
                   <Input
                     type="number"
-                    value={element.validation?.maxLength || ""}
+                    value={element.validation?.maxLength ?? ""}
                     onChange={(e) => handleValidationChange("maxLength", parseInt(e.target.value) || undefined)}
                     className="bg-gray-800"
                   />
