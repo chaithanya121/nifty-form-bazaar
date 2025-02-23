@@ -769,27 +769,23 @@ import { X, Type, Mail, Lock, Calendar, CheckSquare, Check, List, Upload, Radio,
                   </div>
                 )}
 
-                <div className="space-y-2">
-                  <Label className="text-white">Placeholder</Label>
-                  <Input
-                    value={element.placeholder || ""}
-                    onChange={(e) => handleInputChange("placeholder", e.target.value)}
-                    className="bg-gray-800 text-white"
-                  />
-                </div>
-              </>
-            )}
+            <div className="space-y-2">
+              <Label>Label</Label>
+              <Input
+                value={element.label}
+                onChange={(e) => handleInputChange("label", e.target.value)}
+                className="bg-gray-800"
+              />
+            </div>
 
-            {(isFieldElement || isStaticElement) && (
-              <>
-                <div className="space-y-2">
-                  <Label className="text-white">Tooltip</Label>
-                  <Input
-                    value={element.tooltip || ""}
-                    onChange={(e) => handleInputChange("tooltip", e.target.value)}
-                    className="bg-gray-800 text-white"
-                  />
-                </div>
+            <div className="space-y-2">
+              <Label>Tooltip</Label>
+              <Input
+                value={element.tooltip || ""}
+                onChange={(e) => handleInputChange("tooltip", e.target.value)}
+                className="bg-gray-800"
+              />
+            </div>
 
                 <div className="space-y-2">
                   <Label className="text-white">Description</Label>
@@ -899,7 +895,7 @@ import { X, Type, Mail, Lock, Calendar, CheckSquare, Check, List, Upload, Radio,
             <div className="flex items-center justify-between">
               <Label>Nested Data</Label>
               <Switch
-                checked={element.nestedData || false}
+                checked={element.nestedData ?? false}
                 onCheckedChange={(checked) => handleInputChange("nestedData", checked)}
               />
             </div>
