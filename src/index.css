@@ -99,3 +99,19 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Add this to your global CSS file */
+.collapsible-content {
+  transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+  overflow: hidden;
+}
+
+.collapsible-content.collapsed {
+  max-height: 0;
+  opacity: 0;
+}
+
+.collapsible-content.expanded {
+  max-height: 1000px; /* Adjust based on your content */
+  opacity: 1;
+}
