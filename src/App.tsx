@@ -11,22 +11,27 @@ import FormBuilder from "./components/FormBuilder";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <BrowserRouter>
+const App = () => {
+  return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Header />
-        <Toaster />
-        <Sonner />
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/create" element={<FormBuilder />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </TooltipProvider>
+      <BrowserRouter>
+        <div className="relative">
+          <TooltipProvider delayDuration={0}>
+            <Header />
+            <main>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/create" element={<FormBuilder />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </main>
+            <Toaster />
+            <Sonner />
+          </TooltipProvider>
+        </div>
+      </BrowserRouter>
     </QueryClientProvider>
-  </BrowserRouter>
-);
+  );
+};
 
 export default App;
