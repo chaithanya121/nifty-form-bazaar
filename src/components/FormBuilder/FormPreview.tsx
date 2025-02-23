@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { MoreVertical, Download, Save } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -13,8 +14,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const FormPreview = ({ formConfig }: FormPreviewProps) => {
+
   const { toast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -24,6 +32,37 @@ const FormPreview = ({ formConfig }: FormPreviewProps) => {
       description: "Form data has been collected successfully",
     });
   };
+
+  const handleExportForm = () => {
+    const formData = {
+      ...formConfig,
+      // Add any additional data you want to export
+    };
+    
+    const blob = new Blob([JSON.stringify(formData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'form-config.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Form Exported",
+      description: "Your form configuration has been exported successfully",
+    });
+  };
+
+  const handleSaveForm = () => {
+    // Add your save form logic here
+    toast({
+      title: "Form Saved",
+      description: "Your form has been saved successfully",
+    });
+  };
+
 
   const renderFormElement = (element: FormElement) => {
     const elementStyles = element.fieldStyles || {}; // Use the element's styles or an empty object
@@ -240,8 +279,31 @@ const FormPreview = ({ formConfig }: FormPreviewProps) => {
             {renderFormElement(element)}
           </div>
         ))}
-        <Button type="submit">Submit Form</Button>
+        {/* <Button type="submit">Submit Form</Button> */}
       </form>
+
+      <div className="fixed bottom-6 right-6">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button 
+              size="icon" 
+              className="h-12 w-12 rounded-full shadow-lg bg-primary text-white"
+            >
+              <MoreVertical className="h-6 w-6" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleExportForm}>
+              <Download className="mr-2 h-4 w-4" />
+              Export Form
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleSaveForm}>
+              <Save className="mr-2 h-4 w-4" />
+              Save Form
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+    </div>
     </div>
   );
 };

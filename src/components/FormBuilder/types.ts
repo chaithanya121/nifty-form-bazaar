@@ -97,74 +97,72 @@ export type FormElementType =
   | "image-upload" | "multi-image-upload" | "gallery" | "paragraph" | "quote"
   | "image" | "link" | "danger-button" | "static-html";
 
-
-  export interface FormElement {
-    id: string;
-    type: FormElementType;
-    label: string;
-    required: boolean;
-    placeholder?: string;
-    options?: string[];
-    value?: string;
-    description?: string;
-    validation?: {
-      pattern?: string;
-      min?: number;
-      max?: number;
-      minLength?: number;
-      maxLength?: number;
-      step?: number;
-      accept?: string;
-      maxSize?: number;
-      maxFiles?: number;
-    };
-    tooltip?: string;
-    nestedData?: boolean;
-    name?: string;
-    submitData?: boolean;
-    autoFloat?: "Default" | "Off";
-    decorators?: {
-      required?: boolean;
-      readonly?: boolean;
-      disabled?: boolean;
-    };
-    inputType?: string;
-    styles?: {
-      margin?: string;
-      padding?: string;
-      width?: string;
-      height?: string;
-      backgroundColor?: string;
-      border?: string;
-      borderRadius?: string;
-      fontSize?: string;
-      fontWeight?: string;
-      color?: string;
-      fontFamily?: string; // Add fontFamily
-    };
-    labelStyles?: {
-      margin?: string;
-      padding?: string;
-      fontSize?: string;
-      fontWeight?: string;
-      color?: string;
-      fontFamily?: string; // Add fontFamily
-    };
-    fieldStyles?: {
-      margin?: string;
-      padding?: string;
-      width?: string;
-      height?: string;
-      backgroundColor?: string;
-      border?: string;
-      borderRadius?: string;
-      fontSize?: string;
-      fontWeight?: string;
-      color?: string;
-      fontFamily?: string; // Add fontFamily
-    };
-  }
-
+export interface FormElement {
+  id: string;
+  type: FormElementType;
+  label: string;
+  required: boolean;
+  placeholder?: string;
+  options?: string[];
+  value?: string;
+  description?: string;
+  validation?: {
+    pattern?: string;
+    min?: number;
+    max?: number;
+    minLength?: number;
+    maxLength?: number;
+    step?: number;
+    accept?: string;
+    maxSize?: number;
+    maxFiles?: number;
+  };
+  tooltip?: string;
+  nestedData?: boolean;
+  name?: string;
+  submitData?: boolean;
+  autoFloat?: "Default" | "Off";
+  decorators?: {
+    required?: boolean;
+    readonly?: boolean;
+    disabled?: boolean;
+  };
+  inputType?: string;
+  styles?: {
+    margin?: string;
+    padding?: string;
+    width?: string;
+    height?: string;
+    backgroundColor?: string;
+    border?: string;
+    borderRadius?: string;
+    fontSize?: string;
+    fontWeight?: string;
+    color?: string;
+    fontFamily?: string;
+  };
+  labelStyles?: {
+    margin?: string;
+    padding?: string;
+    fontSize?: string;
+    fontWeight?: string;
+    color?: string;
+    fontFamily?: string;
+  };
+  fieldStyles?: {
+    margin?: string;
+    padding?: string;
+    width?: string;
+    height?: string;
+    backgroundColor?: string;
+    border?: string;
+    borderRadius?: string;
+    fontSize?: string;
+    fontWeight?: string;
+    color?: string;
+    fontFamily?: string;
+  };
+}
 
 export interface FormConfig {
   name: string;
@@ -196,6 +194,29 @@ export interface FormConfig {
       margin?: string;
       borderRadius?: string;
     };
+    termsAndConditions: {
+      enabled: boolean;
+      required: boolean;
+      text: string;
+      helpText?: string;
+    };
+    submitButton: {
+      enabled: boolean;
+      text: string;
+      styles?: {
+        margin?: string;
+        padding?: string;
+        width?: string;
+        height?: string;
+        backgroundColor?: string;
+        border?: string;
+        borderRadius?: string;
+        fontSize?: string;
+        fontWeight?: string;
+        color?: string;
+        fontFamily?: string;
+      };
+    };
   };
 }
 
@@ -207,7 +228,9 @@ export interface FormCanvasProps {
   elements: FormElement[];
   setFormConfig: React.Dispatch<React.SetStateAction<FormConfig>>;
   onSelectElement: (element: FormElement) => void;
+  onUpdate: (updatedElement: FormElement) => void;
   selectedElement?: FormElement;
+  formConfig: FormConfig;
 }
 
 export interface FormPreviewProps {

@@ -235,7 +235,8 @@ import {
   Sliders,
   FileWarning,
   AlertTriangle,
-  Images
+  Images,
+  Subm
 } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 
@@ -284,6 +285,9 @@ const STATIC_ELEMENTS = [
   { type: 'link', icon: Link2, label: 'Link', description: 'HTML <a> tag' },
   { type: 'divider', icon: SeparatorHorizontal, label: 'Divider', description: 'HTML <hr> tag' },
   { type: 'static-html', icon: Code, label: 'Static HTML', description: 'Plain HTML element' },
+  // { type: 'form_submit', icon: Submit, label: 'Static HTML', description: 'Plain HTML element' },
+
+
 ];
 
 const STRUCTURE_ELEMENTS = [

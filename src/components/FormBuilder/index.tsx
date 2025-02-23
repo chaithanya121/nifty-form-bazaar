@@ -178,6 +178,15 @@ const DEFAULT_CONFIG: FormConfig = {
   name: "Create account",
   elements: [],
   settings: {
+    termsAndConditions: {
+      enabled: true,
+      required: true,
+      text: "I accept the Terms & Conditions & Privacy Policy",
+    },
+    submitButton: {
+      enabled: true,
+      text: "Submit",
+    },
     preview: {
       width: "Full",
       nesting: true,
@@ -225,6 +234,10 @@ const PRESET_STYLES = {
     borderRadius: "8px",
   },
 };
+
+
+
+
 const FormBuilder = () => {
   const [formConfig, setFormConfig] = useState<FormConfig>(DEFAULT_CONFIG);
   const [previewMode, setPreviewMode] = useState(false);
@@ -348,6 +361,7 @@ const FormBuilder = () => {
                   onSelectElement={handleElementSelect}
                   selectedElement={selectedElement}
                   formConfig={formConfig}
+                  onUpdate={handleElementUpdate}
                 />
               </Card>
               <Card className="col-span-3 bg-gray-800 border-gray-700 p-4">
