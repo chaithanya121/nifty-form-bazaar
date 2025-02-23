@@ -1,4 +1,3 @@
-
 import { FormPreviewProps, FormElement } from "./types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,17 +19,110 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useState } from "react";
 
 const FormPreview = ({ formConfig }: FormPreviewProps) => {
-
+  const [formData, setFormData] = useState<Record<string, any>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const { toast } = useToast();
+
+  const validateField = (element: FormElement, value: any): string => {
+    if (element.required && !value) {
+      return `${element.label} is required`;
+    }
+
+    if (value && element.validation) {
+      switch (element.type) {
+        case "email":
+          const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailPattern.test(value)) {
+            return "Please enter a valid email address";
+          }
+          break;
+        case "text":
+          if (element.validation.minLength && value.length < element.validation.minLength) {
+            return `Minimum length is ${element.validation.minLength} characters`;
+          }
+          if (element.validation.maxLength && value.length > element.validation.maxLength) {
+            return `Maximum length is ${element.validation.maxLength} characters`;
+          }
+          break;
+        case "number":
+          const num = Number(value);
+          if (element.validation.min !== undefined && num < element.validation.min) {
+            return `Minimum value is ${element.validation.min}`;
+          }
+          if (element.validation.max !== undefined && num > element.validation.max) {
+            return `Maximum value is ${element.validation.max}`;
+          }
+          break;
+        case "url":
+          try {
+            new URL(value);
+          } catch {
+            return "Please enter a valid URL";
+          }
+          break;
+        case "phone":
+          const phonePattern = /^\+?[\d\s-]{10,}$/;
+          if (!phonePattern.test(value)) {
+            return "Please enter a valid phone number";
+          }
+          break;
+      }
+    }
+    return "";
+  };
+
+  const handleInputChange = (element: FormElement, value: any) => {
+    setFormData(prev => ({ ...prev, [element.id]: value }));
+    if (formConfig.settings.validation.liveValidation !== "Off") {
+      const error = validateField(element, value);
+      setErrors(prev => ({ ...prev, [element.id]: error }));
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate all fields
+    const newErrors: Record<string, string> = {};
+    let hasErrors = false;
+    
+    formConfig.elements.forEach(element => {
+      const error = validateField(element, formData[element.id]);
+      if (error) {
+        newErrors[element.id] = error;
+        hasErrors = true;
+      }
+    });
+
+    if (!termsAccepted) {
+      toast({
+        title: "Terms & Conditions Required",
+        description: "Please accept the terms and conditions to proceed",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (hasErrors) {
+      setErrors(newErrors);
+      toast({
+        title: "Validation Error",
+        description: "Please check the form for errors",
+        variant: "destructive",
+      });
+      return;
+    }
+
     toast({
       title: "Form Submitted",
       description: "Form data has been collected successfully",
     });
+
+    console.log("Form Data:", formData);
   };
 
   const handleExportForm = () => {
@@ -74,28 +166,43 @@ const FormPreview = ({ formConfig }: FormPreviewProps) => {
       case "date":
       case "file":
         return (
-          <Input
-            id={element.id}
-            type={element.type}
-            placeholder={element.placeholder}
-            required={element.required}
-            style={elementStyles} // Apply styles here
-          />
+          <div>
+            <Input
+              id={element.id}
+              type={element.type}
+              placeholder={element.placeholder}
+              required={element.required}
+              value={formData[element.id] || ""}
+              onChange={(e) => handleInputChange(element, e.target.value)}
+              style={elementStyles}
+              className={errors[element.id] ? "border-red-500" : ""}
+            />
+            {errors[element.id] && (
+              <p className="text-sm text-red-500 mt-1">{errors[element.id]}</p>
+            )}
+          </div>
         );
       case "textarea":
         return (
-          <textarea
-            id={element.id}
-            className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            placeholder={element.placeholder}
-            required={element.required}
-            style={elementStyles} // Apply styles here
-          />
+          <div>
+            <textarea
+              id={element.id}
+              className={`flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors[element.id] ? "border-red-500" : ""}`}
+              placeholder={element.placeholder}
+              required={element.required}
+              value={formData[element.id] || ""}
+              onChange={(e) => handleInputChange(element, e.target.value)}
+              style={elementStyles} // Apply styles here
+            />
+            {errors[element.id] && (
+              <p className="text-sm text-red-500 mt-1">{errors[element.id]}</p>
+            )}
+          </div>
         );
       case "checkbox":
         return (
           <div className="flex items-center space-x-2" style={elementStyles}> {/* Apply styles here */}
-            <Checkbox id={element.id} />
+            <Checkbox id={element.id} checked={formData[element.id] || false} onCheckedChange={(checked) => handleInputChange(element, checked)} />
             <label
               htmlFor={element.id}
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -106,7 +213,7 @@ const FormPreview = ({ formConfig }: FormPreviewProps) => {
         );
       case "radio":
         return (
-          <RadioGroup defaultValue="default" style={elementStyles}> {/* Apply styles here */}
+          <RadioGroup defaultValue="default" style={elementStyles} onValueChange={(value) => handleInputChange(element, value)}> {/* Apply styles here */}
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="default" id={element.id} />
               <label
@@ -120,7 +227,7 @@ const FormPreview = ({ formConfig }: FormPreviewProps) => {
         );
       case "select":
         return (
-          <Select>
+          <Select onValueChange={(value) => handleInputChange(element, value)}>
             <SelectTrigger style={elementStyles}> {/* Apply styles here */}
               <SelectValue placeholder={element.placeholder} />
             </SelectTrigger>
@@ -267,6 +374,7 @@ const FormPreview = ({ formConfig }: FormPreviewProps) => {
         return null;
     }
   };
+
   return (
     <div className="space-y-4" style={formConfig.settings.canvasStyles}>
       <h2 className="text-lg font-semibold">Form Preview</h2>
@@ -274,12 +382,40 @@ const FormPreview = ({ formConfig }: FormPreviewProps) => {
         {formConfig.elements.map((element) => (
           <div key={element.id} className="space-y-2">
             {!["h1", "h2", "h3", "p"].includes(element.type) && (
-              <Label htmlFor={element.id} style={element.labelStyles}>{element.label}</Label>
+              <Label htmlFor={element.id} style={element.labelStyles}>
+                {element.label}
+                {element.required && <span className="text-red-500 ml-1">*</span>}
+              </Label>
             )}
             {renderFormElement(element)}
           </div>
         ))}
-        {/* <Button type="submit">Submit Form</Button> */}
+
+        <div className="space-y-4">
+          {/* Terms and Conditions */}
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="terms" 
+              checked={termsAccepted}
+              onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+            />
+            <label 
+              htmlFor="terms" 
+              className="text-sm text-muted-foreground cursor-pointer"
+            >
+              I accept the terms and conditions
+            </label>
+          </div>
+
+          {/* Submit Button */}
+          <Button 
+            type="submit"
+            className="w-full"
+            style={formConfig.settings.submitButton?.styles}
+          >
+            {formConfig.settings.submitButton?.text || "Submit"}
+          </Button>
+        </div>
       </form>
 
       <div className="fixed bottom-6 right-6">
@@ -303,7 +439,7 @@ const FormPreview = ({ formConfig }: FormPreviewProps) => {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-    </div>
+      </div>
     </div>
   );
 };
