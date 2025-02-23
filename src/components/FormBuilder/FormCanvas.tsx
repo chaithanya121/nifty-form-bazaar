@@ -1,4 +1,3 @@
-
 import { FormCanvasProps, FormElement } from "./types";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -389,51 +388,6 @@ const FormCanvas = ({ elements, setFormConfig, onSelectElement, selectedElement,
   };
 
   return (
-    // <div className="space-y-4" style={formConfig.settings.canvasStyles}>
-    //   <h2 className="text-lg font-semibold">Form Preview</h2>
-    //   {elements.length === 0 ? (
-    //     <div className="flex items-center justify-center h-64 border-2 border-dashed rounded-lg">
-    //       <p className="text-muted-foreground">
-    //         Drag and drop form elements here
-    //       </p>
-    //     </div>
-    //   ) : (
-    //     <div className="space-y-4">
-    //       {elements.map((element) => (
-    //         <Card 
-    //           key={element.id} 
-    //           className={`p-4 cursor-pointer transition-all duration-200 ${
-    //             selectedElement?.id === element.id 
-    //               ? 'ring-2 ring-primary bg-primary/10' 
-    //               : 'hover:bg-muted/50 focus:ring-2 focus:ring-primary'
-    //           }`}
-    //           style={element.fieldStyles} 
-    //           onClick={() => onSelectElement(element)}
-    //         >
-    //           <div className="flex justify-between items-start gap-4">
-    //             <div className="flex-1 space-y-2">
-    //               {!["h1", "h2", "h3", "h4", "paragraph", "quote", "divider", "image", "link", "danger-button", "static-html"].includes(element.type) && (
-    //                 <Label style={element.labelStyles}>{element.label}</Label>
-    //               )}
-    //               {renderFormElement(element)}
-    //             </div>
-    //             <Button
-    //               variant="destructive"
-    //               size="icon"
-    //               className="opacity-0 group-hover:opacity-100 transition-opacity"
-    //               onClick={(e) => {
-    //                 e.stopPropagation(); // Prevent element selection
-    //                 handleDelete(element.id);
-    //               }}
-    //             >
-    //               <Trash2 className="h-4 w-4" />
-    //             </Button>
-    //           </div>
-    //         </Card>
-    //       ))}
-    //     </div>
-    //   )}
-    // </div>
     <div className="space-y-4" style={formConfig.settings.canvasStyles}>
     {elements.length === 0 ? (
       <div className="flex items-center justify-center h-64 border-2 border-dashed rounded-lg">
