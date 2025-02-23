@@ -48,28 +48,6 @@ const FormPreview = ({ formConfig }: FormPreviewProps) => {
             return `Maximum length is ${element.validation.maxLength} characters`;
           }
           break;
-        case "number":
-          const num = Number(value);
-          if (element.validation.min !== undefined && num < element.validation.min) {
-            return `Minimum value is ${element.validation.min}`;
-          }
-          if (element.validation.max !== undefined && num > element.validation.max) {
-            return `Maximum value is ${element.validation.max}`;
-          }
-          break;
-        case "url":
-          try {
-            new URL(value);
-          } catch {
-            return "Please enter a valid URL";
-          }
-          break;
-        case "phone":
-          const phonePattern = /^\+?[\d\s-]{10,}$/;
-          if (!phonePattern.test(value)) {
-            return "Please enter a valid phone number";
-          }
-          break;
       }
     }
     return "";
@@ -77,10 +55,8 @@ const FormPreview = ({ formConfig }: FormPreviewProps) => {
 
   const handleInputChange = (element: FormElement, value: any) => {
     setFormData(prev => ({ ...prev, [element.id]: value }));
-    if (formConfig.settings.validation.liveValidation !== "Off") {
-      const error = validateField(element, value);
-      setErrors(prev => ({ ...prev, [element.id]: error }));
-    }
+    const error = validateField(element, value);
+    setErrors(prev => ({ ...prev, [element.id]: error }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -155,10 +131,7 @@ const FormPreview = ({ formConfig }: FormPreviewProps) => {
     });
   };
 
-
   const renderFormElement = (element: FormElement) => {
-    const elementStyles = element.fieldStyles || {}; // Use the element's styles or an empty object
-  
     switch (element.type) {
       case "text":
       case "email":
@@ -166,60 +139,51 @@ const FormPreview = ({ formConfig }: FormPreviewProps) => {
       case "date":
       case "file":
         return (
-          <div>
-            <Input
-              id={element.id}
-              type={element.type}
-              placeholder={element.placeholder}
-              required={element.required}
-              value={formData[element.id] || ""}
-              onChange={(e) => handleInputChange(element, e.target.value)}
-              style={elementStyles}
-              className={errors[element.id] ? "border-red-500" : ""}
-            />
-            {errors[element.id] && (
-              <p className="text-sm text-red-500 mt-1">{errors[element.id]}</p>
-            )}
-          </div>
+          <Input
+            id={element.id}
+            type={element.type}
+            placeholder={element.placeholder}
+            required={element.required}
+            value={formData[element.id] || ""}
+            onChange={(e) => handleInputChange(element, e.target.value)}
+            style={element.fieldStyles}
+            className={errors[element.id] ? "border-red-500" : ""}
+          />
         );
       case "textarea":
         return (
-          <div>
-            <textarea
-              id={element.id}
-              className={`flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors[element.id] ? "border-red-500" : ""}`}
-              placeholder={element.placeholder}
-              required={element.required}
-              value={formData[element.id] || ""}
-              onChange={(e) => handleInputChange(element, e.target.value)}
-              style={elementStyles} // Apply styles here
-            />
-            {errors[element.id] && (
-              <p className="text-sm text-red-500 mt-1">{errors[element.id]}</p>
-            )}
-          </div>
+          <textarea
+            id={element.id}
+            className={`flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors[element.id] ? "border-red-500" : ""}`}
+            placeholder={element.placeholder}
+            required={element.required}
+            value={formData[element.id] || ""}
+            onChange={(e) => handleInputChange(element, e.target.value)}
+            style={element.fieldStyles}
+          />
         );
       case "checkbox":
         return (
-          <div className="flex items-center space-x-2" style={elementStyles}> {/* Apply styles here */}
-            <Checkbox id={element.id} checked={formData[element.id] || false} onCheckedChange={(checked) => handleInputChange(element, checked)} />
-            <label
-              htmlFor={element.id}
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id={element.id} 
+              checked={formData[element.id] || false} 
+              onCheckedChange={(checked) => handleInputChange(element, checked)}
+            />
+            <label htmlFor={element.id} className="text-sm font-medium leading-none">
               {element.placeholder}
             </label>
           </div>
         );
       case "radio":
         return (
-          <RadioGroup defaultValue="default" style={elementStyles} onValueChange={(value) => handleInputChange(element, value)}> {/* Apply styles here */}
+          <RadioGroup 
+            defaultValue="default" 
+            onValueChange={(value) => handleInputChange(element, value)}
+          >
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="default" id={element.id} />
-              <label
-                htmlFor={element.id}
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
+              <label htmlFor={element.id} className="text-sm font-medium leading-none">
                 {element.placeholder}
               </label>
             </div>
@@ -228,7 +192,7 @@ const FormPreview = ({ formConfig }: FormPreviewProps) => {
       case "select":
         return (
           <Select onValueChange={(value) => handleInputChange(element, value)}>
-            <SelectTrigger style={elementStyles}> {/* Apply styles here */}
+            <SelectTrigger className="w-full">
               <SelectValue placeholder={element.placeholder} />
             </SelectTrigger>
             <SelectContent>
@@ -243,133 +207,13 @@ const FormPreview = ({ formConfig }: FormPreviewProps) => {
           </Select>
         );
       case "h1":
-        return <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl" style={elementStyles}>{element.label}</h1>;
+        return <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">{element.label}</h1>;
       case "h2":
-        return <h2 className="scroll-m-20 text-3xl font-semibold tracking-tight" style={elementStyles}>{element.label}</h2>;
+        return <h2 className="scroll-m-20 text-3xl font-semibold tracking-tight">{element.label}</h2>;
       case "h3":
-        return <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight" style={elementStyles}>{element.label}</h3>;
+        return <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">{element.label}</h3>;
       case "p":
-        return <p className="leading-7 [&:not(:first-child)]:mt-6" style={elementStyles}>{element.label}</p>;
-      case "divider":
-        return <hr className="my-4 border-gray-700" style={elementStyles} />;
-      case "container":
-        return <div className="p-4 border rounded-lg border-gray-700" style={elementStyles}>{element.label}</div>;
-      case "2-columns":
-        return (
-          <div className="grid grid-cols-2 gap-4 p-4 border rounded-lg border-gray-700" style={elementStyles}>
-            {element.label}
-          </div>
-        );
-      case "3-columns":
-        return (
-          <div className="grid grid-cols-3 gap-4 p-4 border rounded-lg border-gray-700" style={elementStyles}>
-            {element.label}
-          </div>
-        );
-      case "4-columns":
-        return (
-          <div className="grid grid-cols-4 gap-4 p-4 border rounded-lg border-gray-700" style={elementStyles}>
-            {element.label}
-          </div>
-        );
-      case "grid":
-        return (
-          <div className="grid grid-cols-2 gap-4 p-4 border rounded-lg border-gray-700" style={elementStyles}>
-            {element.label}
-          </div>
-        );
-      case "table":
-        return (
-          <table className="w-full border-collapse border border-gray-700" style={elementStyles}>
-            <thead>
-              <tr>
-                <th className="border border-gray-700 p-2">Header 1</th>
-                <th className="border border-gray-700 p-2">Header 2</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="border border-gray-700 p-2">Data 1</td>
-                <td className="border border-gray-700 p-2">Data 2</td>
-              </tr>
-            </tbody>
-          </table>
-        );
-      case "list":
-        return (
-          <ul className="list-disc list-inside p-4 border rounded-lg border-gray-700" style={elementStyles}>
-            <li>{element.label}</li>
-          </ul>
-        );
-      case "nested-list":
-        return (
-          <div className="p-4 border rounded-lg border-gray-700" style={elementStyles}>
-            <ul className="list-disc list-inside">
-              <li>{element.label}</li>
-            </ul>
-          </div>
-        );
-      case "tabs":
-        return (
-          <div className="p-4 border rounded-lg border-gray-700" style={elementStyles}>
-            <div className="flex space-x-4">
-              <button className="px-4 py-2 bg-gray-800 rounded-lg">Tab 1</button>
-              <button className="px-4 py-2 bg-gray-800 rounded-lg">Tab 2</button>
-            </div>
-            <div className="mt-4">{element.label}</div>
-          </div>
-        );
-      case "steps":
-        return (
-          <div className="p-4 border rounded-lg border-gray-700" style={elementStyles}>
-            <div className="flex space-x-4">
-              <div className="px-4 py-2 bg-gray-800 rounded-lg">Step 1</div>
-              <div className="px-4 py-2 bg-gray-800 rounded-lg">Step 2</div>
-            </div>
-            <div className="mt-4">{element.label}</div>
-          </div>
-        );
-      case "image":
-        return (
-          <img
-            src={element.label}
-            alt="Image"
-            className="w-full h-auto rounded-lg"
-            style={elementStyles} // Apply styles here
-          />
-        );
-      case "link":
-        return (
-          <a
-            href={element.label}
-            className="text-blue-500 hover:underline"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={elementStyles} // Apply styles here
-          >
-            {element.label}
-          </a>
-        );
-      case "quote":
-        return (
-          <blockquote className="p-4 border-l-4 border-gray-700 italic" style={elementStyles}>
-            {element.label}
-          </blockquote>
-        );
-      case "danger-button":
-        return (
-          <Button variant="destructive" className="w-full" style={elementStyles}> {/* Apply styles here */}
-            {element.label}
-          </Button>
-        );
-      case "static-html":
-        return (
-          <div
-            className="p-4 border rounded-lg border-gray-700"
-            dangerouslySetInnerHTML={{ __html: element.label }}
-            style={elementStyles} // Apply styles here
-          />
-        );
+        return <p className="leading-7 [&:not(:first-child)]:mt-6">{element.label}</p>;
       default:
         return null;
     }
@@ -388,6 +232,9 @@ const FormPreview = ({ formConfig }: FormPreviewProps) => {
               </Label>
             )}
             {renderFormElement(element)}
+            {errors[element.id] && (
+              <p className="text-sm text-red-500 mt-1">{errors[element.id]}</p>
+            )}
           </div>
         ))}
 
