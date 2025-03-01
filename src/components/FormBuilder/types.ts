@@ -1,161 +1,101 @@
+import React from "react";
 
-export type FormElementType = 
-  | "text" | "email" | "password" | "date" | "file" | "textarea" | "checkbox" 
-  | "radio" | "select" | "h1" | "h2" | "h3" | "h4" | "p" | "divider" | "container"
-  | "matrix" | "matrix-table" | "tabs" | "steps" | "grid" | "2-columns" | "3-columns"
-  | "4-columns" | "table" | "list" | "nested-list" | "url" | "phone" | "hidden-input"
-  | "multiselect" | "checkbox-group" | "checkbox-blocks" | "checkbox-tabs"
-  | "radio-group" | "radio-blocks" | "radio-tabs" | "toggle" | "slider"
-  | "range-slider" | "vertical-slider" | "file-upload" | "multi-file-upload"
-  | "image-upload" | "multi-image-upload" | "gallery" | "paragraph" | "quote"
-  | "image" | "link" | "danger-button" | "static-html" | "form_submit" | "Submit"
-  // New form elements
-  | "address" | "name" | "captcha" | "rating" | "appointment" | "street-address" 
-  | "street-address-line2" | "city" | "state-province" | "postal-code" | "first-name" 
-  | "last-name" | "matrix-rating";
-
-export interface FormElement {
-  id: string;
-  type: FormElementType;
-  label: string;
-  required: boolean;
-  placeholder?: string;
-  options?: string[];
-  value?: string;
-  description?: string;
-  validation?: {
-    pattern?: string;
-    min?: number;
-    max?: number;
-    minLength?: number;
-    maxLength?: number;
-    step?: number;
-    accept?: string;
-    maxSize?: number;
-    maxFiles?: number;
-  };
-  tooltip?: string;
-  nestedData?: boolean;
-  name?: string;
-  submitData?: boolean;
-  autoFloat?: "Default" | "Off";
-  decorators?: {
-    required?: boolean;
-    readonly?: boolean;
-    disabled?: boolean;
-  };
-  inputType?: string;
-  styles?: {
-    margin?: string;
-    padding?: string;
-    width?: string;
-    height?: string;
-    backgroundColor?: string;
-    border?: string;
-    borderRadius?: string;
-    fontSize?: string;
-    fontWeight?: string;
-    color?: string;
-    fontFamily?: string;
-  };
-  labelStyles?: {
-    margin?: string;
-    padding?: string;
-    fontSize?: string;
-    fontWeight?: string;
-    color?: string;
-    fontFamily?: string;
-  };
-  fieldStyles?: {
-    margin?: string;
-    padding?: string;
-    width?: string;
-    height?: string;
-    backgroundColor?: string;
-    border?: string;
-    borderRadius?: string;
-    fontSize?: string;
-    fontWeight?: string;
-    color?: string;
-    fontFamily?: string;
-  };
-}
+export type FormElementType =
+  | "text"
+  | "email"
+  | "password"
+  | "textarea"
+  | "select"
+  | "checkbox"
+  | "radio"
+  | "address"
+  | "street-address"
+  | "street-address-line2"
+  | "city"
+  | "state-province"
+  | "postal-code"
+  | "name"
+  | "first-name"
+  | "last-name"
+  | "appointment"
+  | "rating"
+  | "captcha"
+  | "h1"
+  | "h2"
+  | "h3"
+  | "p"
+  | "form_submit";
 
 export interface FormConfig {
   name: string;
   elements: FormElement[];
-  settings: {
-    preview: {
-      width: "Full" | number;
-      nesting: boolean;
-    };
-    validation: {
-      liveValidation: "Default" | "On" | "Off";
-    };
-    layout: {
-      size: "Default" | "Small" | "Medium" | "Large";
-      columns: {
-        default: boolean;
-        tablet: boolean;
-        desktop: boolean;
-      };
-      labels: "Default" | "On" | "Off";
-      placeholders: "Default" | "On" | "Off";
-      errors: "Default" | "On" | "Off";
-      messages: "Default" | "On" | "Off";
-    };
-    canvasStyles?: {
-      backgroundColor?: string;
-      backgroundImage?: string;
-      padding?: string;
-      margin?: string;
-      borderRadius?: string;
-    };
-    termsAndConditions: {
-      enabled: boolean;
-      required: boolean;
-      text: string;
-      helpText?: string;
-    };
-    submitButton: {
-      enabled: boolean;
-      text: string;
-      styles?: {
-        margin?: string;
-        padding?: string;
-        width?: string;
-        height?: string;
-        backgroundColor?: string;
-        border?: string;
-        borderRadius?: string;
-        fontSize?: string;
-        fontWeight?: string;
-        color?: string;
-        fontFamily?: string;
-      };
-    };
-  };
+  settings: FormSettings;
 }
 
-export interface DragStartProps {
-  onDragStart: (e: React.DragEvent<HTMLDivElement>, elementType: string) => void;
+export interface FormSettings {
+  termsAndConditions?: {
+    enabled: boolean;
+    required: boolean;
+    text: string;
+  };
+  submitButton?: {
+    enabled: boolean;
+    text: string;
+  };
+  preview: {
+    width: "Full" | "Contained";
+    nesting: boolean;
+  };
+  validation: {
+    liveValidation: "Default" | "Custom";
+  };
+  layout: {
+    size: "Default" | "Small" | "Large";
+    columns: {
+      default: boolean;
+      tablet: boolean;
+      desktop: boolean;
+    };
+    labels: "Default" | "Floating" | "Hidden";
+    placeholders: "Default" | "Hide Labels" | "Custom";
+    errors: "Default" | "Custom";
+    messages: "Default" | "Custom";
+  };
+  canvasStyles?: React.CSSProperties;
 }
 
 export interface FormCanvasProps {
   elements: FormElement[];
   setFormConfig: React.Dispatch<React.SetStateAction<FormConfig>>;
   onSelectElement: (element: FormElement) => void;
-  onUpdate: (updatedElement: FormElement) => void;
   selectedElement?: FormElement;
   formConfig: FormConfig;
+  onUpdate: (element: FormElement) => void;
 }
 
-export interface FormPreviewProps {
-  formConfig: FormConfig;
+// Export types
+export interface FormElement {
+  id: string;
+  type: FormElementType;
+  label: string;
+  name?: string;
+  placeholder?: string;
+  description?: string;
+  required?: boolean;
+  nestedData?: boolean;
+  options?: string[];
+  value?: string;
+  labelStyles?: React.CSSProperties;
+  fieldStyles?: React.CSSProperties;
+  layout?: {
+    inRow?: boolean;
+    rowPosition?: number;
+  };
 }
 
-export interface ElementSettingsProps {
+export interface FormElementProps {
   element: FormElement;
-  onUpdate: (updatedElement: FormElement) => void;
-  onClose: () => void;
+  value: any;
+  onChange: (value: any) => void;
+  error?: string;
 }

@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Trash2, Send, Star } from "lucide-react";
+import { Trash2, Send, Star, GripVertical, ArrowsHorizontal, ArrowsVertical } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -21,6 +21,8 @@ import { useState, useEffect } from "react";
 const FormCanvas = ({ elements, setFormConfig, onSelectElement, selectedElement, formConfig, onUpdate}: FormCanvasProps) => {    
   const { toast } = useToast();
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [selectedElements, setSelectedElements] = useState<string[]>([]);
+  const [isSelectingMultiple, setIsSelectingMultiple] = useState(false);
 
   const handleDelete = (id: string) => {
     setFormConfig((prev) => ({
@@ -199,6 +201,113 @@ const FormCanvas = ({ elements, setFormConfig, onSelectElement, selectedElement,
     }
   };
 
+  // Function to toggle element layout direction
+  const toggleElementsDirection = (ids: string[], makeRow: boolean) => {
+    if (ids.length <= 1) {
+      toast({
+        title: "Selection Required",
+        description: "Select multiple elements to arrange them",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setFormConfig(prev => {
+      const updatedElements = [...prev.elements];
+      
+      // Find elements to update
+      const elementsToUpdate = updatedElements.filter(el => ids.includes(el.id));
+      
+      // Update layout properties
+      elementsToUpdate.forEach(el => {
+        el.layout = {
+          ...(el.layout || {}),
+          inRow: makeRow,
+          rowPosition: makeRow ? ids.indexOf(el.id) : undefined
+        };
+      });
+      
+      return {
+        ...prev,
+        elements: updatedElements
+      };
+    });
+
+    // Reset selection after arranging
+    setSelectedElements([]);
+    setIsSelectingMultiple(false);
+    
+    toast({
+      title: "Layout Updated",
+      description: `Elements arranged in ${makeRow ? "row" : "column"} layout`,
+    });
+  };
+
+  // Group elements by row layout
+  const groupElementsByLayout = (elements: FormElement[]) => {
+    const result: { row: string | null, elements: FormElement[] }[] = [];
+    const rowElements = new Map<string, FormElement[]>();
+    const standaloneElements: FormElement[] = [];
+    
+    // First, collect row elements
+    elements.forEach(element => {
+      if (element.layout?.inRow) {
+        const rowId = `row-${element.layout.rowPosition}-${element.id}`;
+        if (!rowElements.has(rowId)) {
+          rowElements.set(rowId, []);
+        }
+        rowElements.get(rowId)?.push(element);
+      } else {
+        standaloneElements.push(element);
+      }
+    });
+    
+    // Sort row elements by position
+    Array.from(rowElements.entries()).forEach(([rowId, elements]) => {
+      const sortedElements = elements.sort((a, b) => 
+        (a.layout?.rowPosition || 0) - (b.layout?.rowPosition || 0)
+      );
+      result.push({ row: rowId, elements: sortedElements });
+    });
+    
+    // Add standalone elements
+    standaloneElements.forEach(element => {
+      result.push({ row: null, elements: [element] });
+    });
+    
+    return result;
+  };
+
+  // Determine if element is selected for multiselect
+  const isElementSelected = (elementId: string) => {
+    return selectedElements.includes(elementId);
+  };
+
+  // Handle element selection (single or multi)
+  const handleElementSelect = (element: FormElement, e: React.MouseEvent) => {
+    if (isSelectingMultiple) {
+      // For multi-select mode
+      setSelectedElements(prev => {
+        if (prev.includes(element.id)) {
+          return prev.filter(id => id !== element.id);
+        } else {
+          return [...prev, element.id];
+        }
+      });
+    } else {
+      // Single select - standard behavior
+      onSelectElement(element);
+    }
+  };
+
+  // Toggle multi-select mode
+  const toggleMultiSelectMode = () => {
+    setIsSelectingMultiple(prev => !prev);
+    if (!isSelectingMultiple) {
+      setSelectedElements([]);
+    }
+  };
+
   useEffect(() => {
     // Fix: We need to update single elements, not an array
     const checkbox: FormElement = {
@@ -232,9 +341,46 @@ const FormCanvas = ({ elements, setFormConfig, onSelectElement, selectedElement,
     }, 100);
   }, []);
 
+  const groupedElements = groupElementsByLayout(elements);
 
   return (
     <div className="space-y-4" style={formConfig.settings.canvasStyles}>
+      {/* Multi-select controls */}
+      {isSelectingMultiple && selectedElements.length > 0 && (
+        <div className="flex items-center gap-2 p-2 bg-primary/20 rounded-md mb-4">
+          <span>{selectedElements.length} elements selected</span>
+          <Button 
+            size="sm" 
+            onClick={() => toggleElementsDirection(selectedElements, true)}
+            className="gap-1"
+          >
+            <ArrowsHorizontal className="h-4 w-4" />
+            Arrange in Row
+          </Button>
+          <Button 
+            size="sm" 
+            variant="outline"
+            onClick={() => toggleElementsDirection(selectedElements, false)}
+            className="gap-1"
+          >
+            <ArrowsVertical className="h-4 w-4" />
+            Arrange in Column
+          </Button>
+        </div>
+      )}
+
+      <div className="flex justify-end mb-2">
+        <Button 
+          size="sm" 
+          variant={isSelectingMultiple ? "default" : "outline"} 
+          onClick={toggleMultiSelectMode}
+          className="gap-1"
+        >
+          <GripVertical className="h-4 w-4" />
+          {isSelectingMultiple ? "Exit Multi-select" : "Select Multiple"}
+        </Button>
+      </div>
+
       {elements.length === 0 ? (
         <div className="flex items-center justify-center h-64 border-2 border-dashed rounded-lg">
           <p className="text-muted-foreground">
@@ -243,35 +389,46 @@ const FormCanvas = ({ elements, setFormConfig, onSelectElement, selectedElement,
         </div>
       ) : (
         <div className="space-y-4">
-          {elements.map((element) => (
-            <div
-              key={element.id}
-              className={`group relative p-4 border rounded-lg transition-colors ${
-                selectedElement?.id === element.id
-                  ? "ring-2 ring-primary bg-primary/10"
-                  : "hover:bg-muted/50"
-              }`}
-              onClick={() => onSelectElement(element)}
+          {groupedElements.map((group) => (
+            <div 
+              key={group.row || group.elements[0].id} 
+              className={group.row ? "flex gap-4" : ""}
             >
-              <div className="flex justify-between items-start gap-4">
-                <div className="flex-1 space-y-2">
-                  {!["h1", "h2", "h3", "p"].includes(element.type) && (
-                    <Label style={element.labelStyles}>{element.label}</Label>
-                  )}
-                  {renderFormElement(element)}
-                </div>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDelete(element.id);
-                  }}
+              {group.elements.map((element) => (
+                <div
+                  key={element.id}
+                  className={`group relative p-4 border rounded-lg transition-colors ${
+                    isSelectingMultiple 
+                      ? isElementSelected(element.id) 
+                        ? "ring-2 ring-primary bg-primary/10" 
+                        : "hover:bg-muted/50"
+                      : selectedElement?.id === element.id
+                        ? "ring-2 ring-primary bg-primary/10"
+                        : "hover:bg-muted/50"
+                  } ${group.row ? "flex-1" : "w-full"}`}
+                  onClick={(e) => handleElementSelect(element, e)}
                 >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="flex-1 space-y-2">
+                      {!["h1", "h2", "h3", "p"].includes(element.type) && (
+                        <Label style={element.labelStyles}>{element.label}</Label>
+                      )}
+                      {renderFormElement(element)}
+                    </div>
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(element.id);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
             </div>
           ))}
 
