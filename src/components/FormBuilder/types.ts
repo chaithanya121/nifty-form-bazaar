@@ -91,6 +91,7 @@ export interface FormElement {
   layout?: {
     inRow?: boolean;
     rowPosition?: number;
+    rowId?: string;
   };
   validation?: {
     minLength?: number;

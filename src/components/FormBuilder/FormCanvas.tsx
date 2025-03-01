@@ -1,3 +1,4 @@
+
 import { FormCanvasProps, FormElement } from "./types";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,13 +16,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@radix-ui/react-tooltip";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const FormCanvas = ({ elements, setFormConfig, onSelectElement, selectedElement, formConfig, onUpdate}: FormCanvasProps) => {    
   const { toast } = useToast();
   const [termsAccepted, setTermsAccepted] = useState(false);
-  const [selectedElements, setSelectedElements] = useState<string[]>([]);
-  const [isSelectingMultiple, setIsSelectingMultiple] = useState(false);
+  const [draggedElement, setDraggedElement] = useState<FormElement | null>(null);
+  const [dropTargetId, setDropTargetId] = useState<string | null>(null);
+  const [dropPosition, setDropPosition] = useState<'left' | 'right' | 'above' | 'below' | null>(null);
+  const [activeRowId, setActiveRowId] = useState<string | null>(null);
 
   const handleDelete = (id: string) => {
     setFormConfig((prev) => ({
@@ -48,6 +51,161 @@ const FormCanvas = ({ elements, setFormConfig, onSelectElement, selectedElement,
       description: "Your form has been submitted successfully.",
     });
     // Handle form submission logic here
+  };
+
+  const handleDragStart = (e: React.DragEvent, element: FormElement) => {
+    e.stopPropagation();
+    setDraggedElement(element);
+    e.dataTransfer.setData('text/plain', element.id);
+    // Create a ghost image that's smaller than the original
+    const ghostElement = document.createElement('div');
+    ghostElement.textContent = element.label;
+    ghostElement.style.padding = '8px';
+    ghostElement.style.background = '#f0f0f0';
+    ghostElement.style.border = '1px solid #ccc';
+    ghostElement.style.borderRadius = '4px';
+    ghostElement.style.position = 'absolute';
+    ghostElement.style.top = '-1000px';
+    document.body.appendChild(ghostElement);
+    
+    e.dataTransfer.setDragImage(ghostElement, 0, 0);
+    
+    setTimeout(() => {
+      document.body.removeChild(ghostElement);
+    }, 0);
+  };
+
+  const handleDragOver = (e: React.DragEvent, targetElement: FormElement) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!draggedElement || draggedElement.id === targetElement.id) return;
+    
+    setDropTargetId(targetElement.id);
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const width = rect.width;
+    const height = rect.height;
+    
+    // Determine drop position (left/right/above/below)
+    if (x < width * 0.25) {
+      setDropPosition('left');
+    } else if (x > width * 0.75) {
+      setDropPosition('right');
+    } else if (y < height * 0.5) {
+      setDropPosition('above');
+    } else {
+      setDropPosition('below');
+    }
+  };
+
+  const handleDragLeave = () => {
+    setDropTargetId(null);
+    setDropPosition(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, targetElement: FormElement) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!draggedElement || !dropPosition) return;
+    
+    setFormConfig(prev => {
+      const updatedElements = [...prev.elements];
+      const sourceIndex = updatedElements.findIndex(el => el.id === draggedElement.id);
+      const targetIndex = updatedElements.findIndex(el => el.id === targetElement.id);
+      
+      if (sourceIndex === -1 || targetIndex === -1) return prev;
+      
+      // Remove the source element from its original position
+      const [movedElement] = updatedElements.splice(sourceIndex, 1);
+      
+      // Handle different drop positions
+      if (dropPosition === 'left' || dropPosition === 'right') {
+        // Create or join a row
+        const newRowId = `row-${Date.now()}`;
+        
+        // Check if target is already in a row
+        if (targetElement.layout?.inRow && targetElement.layout.rowId) {
+          // Join existing row
+          const rowId = targetElement.layout.rowId;
+          movedElement.layout = {
+            inRow: true,
+            rowId,
+            rowPosition: dropPosition === 'left' ? targetElement.layout.rowPosition! - 0.5 : targetElement.layout.rowPosition! + 0.5
+          };
+          
+          // Update all elements in this row to have integer positions after sorting
+          const rowElements = updatedElements.filter(el => el.layout?.rowId === rowId);
+          rowElements.push(movedElement);
+          
+          // Sort by position
+          rowElements.sort((a, b) => (a.layout?.rowPosition || 0) - (b.layout?.rowPosition || 0));
+          
+          // Reassign integer positions
+          rowElements.forEach((el, idx) => {
+            el.layout = {
+              ...el.layout,
+              rowPosition: idx
+            };
+          });
+        } else {
+          // Create new row with the two elements
+          const rowElements = [targetElement, movedElement];
+          rowElements.forEach((el, idx) => {
+            el.layout = {
+              inRow: true,
+              rowId: newRowId,
+              rowPosition: dropPosition === 'left' ? 
+                (idx === 0 ? 1 : 0) : 
+                idx
+            };
+          });
+        }
+      } else {
+        // Above or below - remove from row if it was in one
+        if (movedElement.layout?.inRow) {
+          movedElement.layout = {}; // Remove row information
+        }
+        
+        // Insert at the appropriate position
+        const newTargetIndex = dropPosition === 'above' ? targetIndex : targetIndex + 1;
+        updatedElements.splice(newTargetIndex, 0, movedElement);
+      }
+      
+      // Clean up any empty rows
+      const rowIds = new Set<string>();
+      updatedElements.forEach(el => {
+        if (el.layout?.rowId) rowIds.add(el.layout.rowId);
+      });
+      
+      // For each row, ensure we have at least 2 elements, otherwise remove row formatting
+      rowIds.forEach(rowId => {
+        const rowElements = updatedElements.filter(el => el.layout?.rowId === rowId);
+        if (rowElements.length < 2) {
+          rowElements.forEach(el => {
+            el.layout = {}; // Remove row information
+          });
+        }
+      });
+      
+      toast({
+        title: "Layout Updated",
+        description: `Element moved ${dropPosition} target`,
+      });
+      
+      return {
+        ...prev,
+        elements: updatedElements
+      };
+    });
+    
+    // Reset drag state
+    setDraggedElement(null);
+    setDropTargetId(null);
+    setDropPosition(null);
   };
 
   const renderFormElement = (element: FormElement) => {
@@ -200,75 +358,58 @@ const FormCanvas = ({ elements, setFormConfig, onSelectElement, selectedElement,
     }
   };
 
-  // Replace instances of ArrowsHorizontal with MoveHorizontal
-  const toggleElementsDirection = (ids: string[], makeRow: boolean) => {
-    if (ids.length <= 1) {
-      toast({
-        title: "Selection Required",
-        description: "Select multiple elements to arrange them",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setFormConfig(prev => {
-      const updatedElements = [...prev.elements];
-      
-      // Find elements to update
-      const elementsToUpdate = updatedElements.filter(el => ids.includes(el.id));
-      
-      // Update layout properties
-      elementsToUpdate.forEach(el => {
-        el.layout = {
-          ...(el.layout || {}),
-          inRow: makeRow,
-          rowPosition: makeRow ? ids.indexOf(el.id) : undefined
-        };
-      });
-      
-      return {
-        ...prev,
-        elements: updatedElements
-      };
-    });
-
-    // Reset selection after arranging
-    setSelectedElements([]);
-    setIsSelectingMultiple(false);
+  // Group elements by row layout
+  const groupElementsByLayout = (elements: FormElement[]) => {
+    const result: { row: string | null, elements: FormElement[] }[] = [];
+    const rowGroups = new Map<string, FormElement[]>();
+    const standaloneElements: FormElement[] = [];
     
-    toast({
-      title: "Layout Updated",
-      description: `Elements arranged in ${makeRow ? "row" : "column"} layout`,
-    });
-  };
-
-  // Determine if element is selected for multiselect
-  const isElementSelected = (elementId: string) => {
-    return selectedElements.includes(elementId);
-  };
-
-  // Handle element selection (single or multi)
-  const handleElementSelect = (element: FormElement, e: React.MouseEvent) => {
-    if (isSelectingMultiple) {
-      // For multi-select mode
-      setSelectedElements(prev => {
-        if (prev.includes(element.id)) {
-          return prev.filter(id => id !== element.id);
-        } else {
-          return [...prev, element.id];
+    // First, collect elements by row ID
+    elements.forEach(element => {
+      if (element.layout?.inRow && element.layout.rowId) {
+        const rowId = element.layout.rowId;
+        if (!rowGroups.has(rowId)) {
+          rowGroups.set(rowId, []);
         }
-      });
-    } else {
-      // Single select - standard behavior
-      onSelectElement(element);
-    }
+        rowGroups.get(rowId)?.push(element);
+      } else {
+        standaloneElements.push(element);
+      }
+    });
+    
+    // Sort elements in each row by position
+    rowGroups.forEach((rowElements, rowId) => {
+      const sortedElements = [...rowElements].sort((a, b) => 
+        (a.layout?.rowPosition || 0) - (b.layout?.rowPosition || 0)
+      );
+      result.push({ row: rowId, elements: sortedElements });
+    });
+    
+    // Add standalone elements
+    standaloneElements.forEach(element => {
+      result.push({ row: null, elements: [element] });
+    });
+    
+    return result;
   };
 
-  // Toggle multi-select mode
-  const toggleMultiSelectMode = () => {
-    setIsSelectingMultiple(prev => !prev);
-    if (!isSelectingMultiple) {
-      setSelectedElements([]);
+  // Get classes for drop indicators based on drop position
+  const getDropIndicatorClasses = (elementId: string) => {
+    if (dropTargetId !== elementId || !dropPosition) return "";
+    
+    const baseClasses = "absolute pointer-events-none border-2 border-primary z-10";
+    
+    switch (dropPosition) {
+      case 'left':
+        return `${baseClasses} left-0 top-0 bottom-0 w-1 border-r-0 border-b-0 border-t-0`;
+      case 'right':
+        return `${baseClasses} right-0 top-0 bottom-0 w-1 border-l-0 border-b-0 border-t-0`;
+      case 'above':
+        return `${baseClasses} left-0 right-0 top-0 h-1 border-r-0 border-l-0 border-b-0`;
+      case 'below':
+        return `${baseClasses} left-0 right-0 bottom-0 h-1 border-r-0 border-l-0 border-t-0`;
+      default:
+        return "";
     }
   };
 
@@ -305,80 +446,10 @@ const FormCanvas = ({ elements, setFormConfig, onSelectElement, selectedElement,
     }, 100);
   }, []);
 
-  // Group elements by row layout
-  const groupElementsByLayout = (elements: FormElement[]) => {
-    const result: { row: string | null, elements: FormElement[] }[] = [];
-    const rowElements = new Map<string, FormElement[]>();
-    const standaloneElements: FormElement[] = [];
-    
-    // First, collect row elements
-    elements.forEach(element => {
-      if (element.layout?.inRow) {
-        const rowId = `row-${element.layout.rowPosition}-${element.id}`;
-        if (!rowElements.has(rowId)) {
-          rowElements.set(rowId, []);
-        }
-        rowElements.get(rowId)?.push(element);
-      } else {
-        standaloneElements.push(element);
-      }
-    });
-    
-    // Sort row elements by position
-    Array.from(rowElements.entries()).forEach(([rowId, elements]) => {
-      const sortedElements = elements.sort((a, b) => 
-        (a.layout?.rowPosition || 0) - (b.layout?.rowPosition || 0)
-      );
-      result.push({ row: rowId, elements: sortedElements });
-    });
-    
-    // Add standalone elements
-    standaloneElements.forEach(element => {
-      result.push({ row: null, elements: [element] });
-    });
-    
-    return result;
-  };
-
   const groupedElements = groupElementsByLayout(elements);
 
   return (
     <div className="space-y-4" style={formConfig.settings.canvasStyles}>
-      {isSelectingMultiple && selectedElements.length > 0 && (
-        <div className="flex items-center gap-2 p-2 bg-primary/20 rounded-md mb-4">
-          <span>{selectedElements.length} elements selected</span>
-          <Button 
-            size="sm" 
-            onClick={() => toggleElementsDirection(selectedElements, true)}
-            className="gap-1"
-          >
-            <MoveHorizontal className="h-4 w-4" />
-            Arrange in Row
-          </Button>
-          <Button 
-            size="sm" 
-            variant="outline"
-            onClick={() => toggleElementsDirection(selectedElements, false)}
-            className="gap-1"
-          >
-            <MoveVertical className="h-4 w-4" />
-            Arrange in Column
-          </Button>
-        </div>
-      )}
-
-      <div className="flex justify-end mb-2">
-        <Button 
-          size="sm" 
-          variant={isSelectingMultiple ? "default" : "outline"} 
-          onClick={toggleMultiSelectMode}
-          className="gap-1"
-        >
-          <GripVertical className="h-4 w-4" />
-          {isSelectingMultiple ? "Exit Multi-select" : "Select Multiple"}
-        </Button>
-      </div>
-
       {elements.length === 0 ? (
         <div className="flex items-center justify-center h-64 border-2 border-dashed rounded-lg">
           <p className="text-muted-foreground">
@@ -395,17 +466,19 @@ const FormCanvas = ({ elements, setFormConfig, onSelectElement, selectedElement,
               {group.elements.map((element) => (
                 <div
                   key={element.id}
-                  className={`group relative p-4 border rounded-lg transition-colors ${
-                    isSelectingMultiple 
-                      ? isElementSelected(element.id) 
-                        ? "ring-2 ring-primary bg-primary/10" 
-                        : "hover:bg-muted/50"
-                      : selectedElement?.id === element.id
-                        ? "ring-2 ring-primary bg-primary/10"
-                        : "hover:bg-muted/50"
-                  } ${group.row ? "flex-1" : "w-full"}`}
-                  onClick={(e) => handleElementSelect(element, e)}
+                  className={`group relative p-4 border rounded-lg transition-colors cursor-move
+                    ${selectedElement?.id === element.id
+                      ? "ring-2 ring-primary bg-primary/10"
+                      : "hover:bg-muted/50"
+                    } ${group.row ? "flex-1" : "w-full"}`}
+                  onClick={() => onSelectElement(element)}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, element)}
+                  onDragOver={(e) => handleDragOver(e, element)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, element)}
                 >
+                  <div className={getDropIndicatorClasses(element.id)}></div>
                   <div className="flex justify-between items-start gap-4">
                     <div className="flex-1 space-y-2">
                       {!["h1", "h2", "h3", "p"].includes(element.type) && (
