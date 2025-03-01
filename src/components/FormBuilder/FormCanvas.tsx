@@ -1,9 +1,10 @@
+
 import { FormCanvasProps, FormElement } from "./types";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, Send } from "lucide-react";  // Changed Subm to Send
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -15,9 +16,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@radix-ui/react-tooltip";
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 
-const FormCanvas = ({ elements, setFormConfig, onSelectElement, selectedElement, formConfig ,onUpdate}: FormCanvasProps) => {    
+const FormCanvas = ({ elements, setFormConfig, onSelectElement, selectedElement, formConfig, onUpdate}: FormCanvasProps) => {    
   const { toast } = useToast();
   const [termsAccepted, setTermsAccepted] = useState(false);
 
@@ -57,9 +58,10 @@ const FormCanvas = ({ elements, setFormConfig, onSelectElement, selectedElement,
   };
 
   useEffect(() => {
-    let json = [{
+    // Fix: We need to update single elements, not an array
+    const checkbox: FormElement = {
       id: `element-${Date.now()}`,
-      type: 'Checkbox',
+      type: "checkbox",
       label: `New Checkbox`,
       required: false,
       placeholder: `Enter Checkbox`,
@@ -67,18 +69,25 @@ const FormCanvas = ({ elements, setFormConfig, onSelectElement, selectedElement,
       description: "",
       name: 'checkbox',
       options: [],
-    },{
-      id: `element-${Date.now()}`,
-      type: "Submit",
-      label: `Submit`,
-      required: false,
-      placeholder: `Submit`,
-      nestedData: false,
-      description: "",
-      name: "submit",
-      options: [],
-    }]
-    onUpdate(json);
+    };
+    
+    onUpdate(checkbox);
+    
+    // Add a small delay before adding the submit button
+    setTimeout(() => {
+      const submit: FormElement = {
+        id: `element-${Date.now() + 100}`,
+        type: "form_submit",
+        label: `Submit`,
+        required: false,
+        placeholder: `Submit`,
+        nestedData: false,
+        description: "",
+        name: "submit",
+        options: [],
+      };
+      onUpdate(submit);
+    }, 100);
   }, []);
 
 
@@ -147,7 +156,7 @@ const FormCanvas = ({ elements, setFormConfig, onSelectElement, selectedElement,
           {/* Add Submit Button */}
           <div
             className={`group relative p-4 border rounded-lg transition-colors ${
-              selectedElement?.type === "Submit"
+              selectedElement?.type === "form_submit"
                 ? "ring-2 ring-primary bg-primary/10"
                 : "hover:bg-muted/50"
             }`}
@@ -172,6 +181,7 @@ const FormCanvas = ({ elements, setFormConfig, onSelectElement, selectedElement,
                   onClick={handleSubmit}
                 >
                   {selectedElement?.type === "form_submit" ? selectedElement.label : "Submit"} 
+                  <Send className="ml-2 h-4 w-4" />
                 </Button>
               </div>
             </div>

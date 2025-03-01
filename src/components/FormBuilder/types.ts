@@ -1,3 +1,4 @@
+
 export type FormElementType = 
   | "text" | "email" | "password" | "date" | "file" | "textarea" | "checkbox" 
   | "radio" | "select" | "h1" | "h2" | "h3" | "h4" | "p" | "divider" | "container"
@@ -7,7 +8,7 @@ export type FormElementType =
   | "radio-group" | "radio-blocks" | "radio-tabs" | "toggle" | "slider"
   | "range-slider" | "vertical-slider" | "file-upload" | "multi-file-upload"
   | "image-upload" | "multi-image-upload" | "gallery" | "paragraph" | "quote"
-  | "image" | "link" | "danger-button" | "static-html";
+  | "image" | "link" | "danger-button" | "static-html" | "form_submit" | "Submit";
 
 export interface FormElement {
   id: string;
