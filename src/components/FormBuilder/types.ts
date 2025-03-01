@@ -8,7 +8,11 @@ export type FormElementType =
   | "radio-group" | "radio-blocks" | "radio-tabs" | "toggle" | "slider"
   | "range-slider" | "vertical-slider" | "file-upload" | "multi-file-upload"
   | "image-upload" | "multi-image-upload" | "gallery" | "paragraph" | "quote"
-  | "image" | "link" | "danger-button" | "static-html" | "form_submit" | "Submit";
+  | "image" | "link" | "danger-button" | "static-html" | "form_submit" | "Submit"
+  // New form elements
+  | "address" | "name" | "captcha" | "rating" | "appointment" | "street-address" 
+  | "street-address-line2" | "city" | "state-province" | "postal-code" | "first-name" 
+  | "last-name" | "matrix-rating";
 
 export interface FormElement {
   id: string;

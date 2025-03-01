@@ -41,13 +41,19 @@ import {
   FileWarning,
   AlertTriangle,
   Images,
-  Send
+  Send,
+  Home,
+  User,
+  Shield,
+  Star,
+  Clock
 } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
 const FIELD_ELEMENTS = [
+  // Original field elements
   { type: "text", icon: Type, label: "Text Input", description: "Single line text input" },
   { type: "email", icon: Mail, label: "Email Input", description: "Text field that expects an email" },
   { type: "password", icon: Lock, label: "Password", description: "Text field that expects a password" },
@@ -65,6 +71,7 @@ const FIELD_ELEMENTS = [
   { type: 'radio-tabs', icon: Radio, label: 'Radio tabs', description: 'Radio options masked as tabs' },
   { type: 'matrix', icon: Grid, label: 'Matrix', description: 'A matrix of input fields' },
   { type: 'matrix-table', icon: Table2, label: 'Matrix table', description: 'Spreadsheet like table of text inputs' },
+  { type: 'matrix-rating', icon: Table2, label: 'Matrix rating', description: 'Matrix table with rating options' },
   { type: 'toggle', icon: ToggleLeft, label: 'Toggle', description: 'Toggle / switch button' },
   { type: 'multiselect', icon: List, label: 'Multiselect', description: 'Multiple select input' },
   { type: 'date-range', icon: Calendar, label: 'Date range', description: 'Date picker that allows date range' },
@@ -76,8 +83,21 @@ const FIELD_ELEMENTS = [
   { type: 'image-upload', icon: Image, label: 'Image upload', description: 'File upload with image only' },
   { type: 'multi-image-upload', icon: Images, label: 'Multi-image upload', description: 'Multi-file upload with images only' },
   { type: 'gallery', icon: Images, label: 'Gallery', description: 'Multi-image upload with gallery view' },
-  { type: 'captcha', icon: FileWarning, label: 'Captcha', description: 'Prevents submission by robots' },
+  { type: 'captcha', icon: Shield, label: 'Captcha', description: 'Prevents submission by robots' },
   { type: 'hidden-input', icon: Lock, label: 'Hidden input', description: 'Single line or multiline text area' },
+  
+  // New form elements from the images
+  { type: "address", icon: Home, label: "Address Block", description: "Full address input block" },
+  { type: "street-address", icon: Home, label: "Street Address", description: "Street address input" },
+  { type: "street-address-line2", icon: Home, label: "Street Address Line 2", description: "Additional street address input" },
+  { type: "city", icon: Home, label: "City", description: "City input field" },
+  { type: "state-province", icon: Map, label: "State/Province", description: "State or province input" },
+  { type: "postal-code", icon: Hash, label: "Postal/Zip Code", description: "Postal or zip code input" },
+  { type: "name", icon: User, label: "Name Block", description: "Full name input block" },
+  { type: "first-name", icon: User, label: "First Name", description: "First name input" },
+  { type: "last-name", icon: User, label: "Last Name", description: "Last name input" },
+  { type: "rating", icon: Star, label: "Rating", description: "Star rating input" },
+  { type: "appointment", icon: Calendar, label: "Appointment", description: "Appointment scheduling with calendar and time slots" },
 ];
 
 // Basic elements to show when toggle is enabled
