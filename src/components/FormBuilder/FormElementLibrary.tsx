@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { DragStartProps } from "./types";
@@ -43,17 +44,19 @@ import {
   Send
 } from 'lucide-react';
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 const FIELD_ELEMENTS = [
   { type: "text", icon: Type, label: "Text Input", description: "Single line text input" },
   { type: "email", icon: Mail, label: "Email Input", description: "Text field that expects an email" },
   { type: "password", icon: Lock, label: "Password", description: "Text field that expects a password" },
+  { type: "textarea", icon: AlignLeft, label: "Textarea", description: "Single line or multiline text area" },
   { type: "date", icon: Calendar, label: "Date Picker", description: "Date picker input" },
   { type: "checkbox", icon: CheckSquare, label: "Checkbox", description: "Plain checkbox input" },
   { type: "radio", icon: Check, label: "Radio Button", description: "Plain radio input" },
   { type: "select", icon: List, label: "Select", description: "Select input" },
   { type: "file", icon: Upload, label: "File Upload", description: "File upload input" },
-  { type: "textarea", icon: Type, label: "Textarea", description: "Single line or multiline text area" },
   { type: 'checkbox-group', icon: CheckSquare, label: 'Checkbox group', description: 'Plain checkbox options' },
   { type: 'checkbox-blocks', icon: CheckSquare, label: 'Checkbox blocks', description: 'Checkbox options as blocks' },
   { type: 'checkbox-tabs', icon: CheckSquare, label: 'Checkbox tabs', description: 'Checkbox options masked as tabs' },
@@ -75,6 +78,15 @@ const FIELD_ELEMENTS = [
   { type: 'gallery', icon: Images, label: 'Gallery', description: 'Multi-image upload with gallery view' },
   { type: 'captcha', icon: FileWarning, label: 'Captcha', description: 'Prevents submission by robots' },
   { type: 'hidden-input', icon: Lock, label: 'Hidden input', description: 'Single line or multiline text area' },
+];
+
+// Basic elements to show when toggle is enabled
+const BASIC_FIELD_ELEMENTS = [
+  { type: "text", icon: Type, label: "Text Input", description: "Single line text input" },
+  { type: "email", icon: Mail, label: "Email Input", description: "Text field that expects an email" },
+  { type: "password", icon: Lock, label: "Password", description: "Text field that expects a password" },
+  { type: "textarea", icon: AlignLeft, label: "Textarea", description: "Single line or multiline text area" },
+  { type: "form_submit", icon: Send, label: "Submit Button", description: "Form submission button" },
 ];
 
 const STATIC_ELEMENTS = [
@@ -108,6 +120,7 @@ const STRUCTURE_ELEMENTS = [
 const FormElementLibrary = ({ onDragStart }: DragStartProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('fields');
+  const [showBasicOnly, setShowBasicOnly] = useState(false);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -123,7 +136,7 @@ const FormElementLibrary = ({ onDragStart }: DragStartProps) => {
   const getFilteredElements = () => {
     switch (activeTab) {
       case 'fields':
-        return filterElements(FIELD_ELEMENTS);
+        return filterElements(showBasicOnly ? BASIC_FIELD_ELEMENTS : FIELD_ELEMENTS);
       case 'static':
         return filterElements(STATIC_ELEMENTS);
       case 'structure':
@@ -142,6 +155,17 @@ const FormElementLibrary = ({ onDragStart }: DragStartProps) => {
         value={searchQuery}
         onChange={handleSearchChange}
       />
+      
+      {/* Toggle for Basic Elements */}
+      <div className="flex items-center justify-between">
+        <Label htmlFor="basic-mode" className="text-white">Basic Mode</Label>
+        <Switch 
+          id="basic-mode" 
+          checked={showBasicOnly} 
+          onCheckedChange={setShowBasicOnly} 
+        />
+      </div>
+      
       <Tabs defaultValue="fields" className="w-full" onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-3 bg-gray-800 text-white">
           <TabsTrigger value="fields">Fields</TabsTrigger>
