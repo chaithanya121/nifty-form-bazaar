@@ -4,7 +4,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 interface InputProps extends React.ComponentProps<"input"> {
-  variant?: "default" | "address" | "name" | "appointment"
+  variant?: "default" | "address" | "name" | "appointment" | "rating" | "captcha"
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -17,6 +17,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           variant === "address" && "border-blue-200 bg-white",
           variant === "name" && "border-blue-200 bg-white",
           variant === "appointment" && "border-blue-500 bg-white",
+          variant === "rating" && "border-yellow-200 bg-white",
+          variant === "captcha" && "border-green-200 bg-white",
           className
         )}
         ref={ref}

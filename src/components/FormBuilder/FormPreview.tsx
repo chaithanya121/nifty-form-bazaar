@@ -1,3 +1,4 @@
+
 import { FormPreviewProps, FormElement } from "./types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -5,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { MoreVertical, Download, Save } from "lucide-react";
+import { MoreVertical, Download, Save, Star } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -149,6 +150,93 @@ const FormPreview = ({ formConfig }: FormPreviewProps) => {
             style={element.fieldStyles}
             className={errors[element.id] ? "border-red-500" : ""}
           />
+        );
+      case "address":
+      case "street-address":
+      case "street-address-line2":
+      case "city":
+      case "state-province":
+      case "postal-code":
+        return (
+          <Input
+            id={element.id}
+            type="text"
+            placeholder={element.placeholder}
+            required={element.required}
+            value={formData[element.id] || ""}
+            onChange={(e) => handleInputChange(element, e.target.value)}
+            style={element.fieldStyles}
+            className={errors[element.id] ? "border-red-500" : ""}
+            variant="address"
+          />
+        );
+      case "name":
+      case "first-name":
+      case "last-name":
+        return (
+          <Input
+            id={element.id}
+            type="text"
+            placeholder={element.placeholder}
+            required={element.required}
+            value={formData[element.id] || ""}
+            onChange={(e) => handleInputChange(element, e.target.value)}
+            style={element.fieldStyles}
+            className={errors[element.id] ? "border-red-500" : ""}
+            variant="name"
+          />
+        );
+      case "appointment":
+        return (
+          <Input
+            id={element.id}
+            type="datetime-local"
+            placeholder={element.placeholder}
+            required={element.required}
+            value={formData[element.id] || ""}
+            onChange={(e) => handleInputChange(element, e.target.value)}
+            style={element.fieldStyles}
+            className={errors[element.id] ? "border-red-500" : ""}
+            variant="appointment"
+          />
+        );
+      case "rating":
+        return (
+          <div className="flex items-center space-x-1">
+            {[1, 2, 3, 4, 5].map((value) => (
+              <button
+                key={value}
+                type="button"
+                className={`text-gray-400 ${formData[element.id] >= value ? "text-yellow-500" : ""} hover:text-yellow-500 focus:outline-none`}
+                onClick={() => handleInputChange(element, value)}
+              >
+                <Star className="h-6 w-6" />
+              </button>
+            ))}
+          </div>
+        );
+      case "captcha":
+        return (
+          <div className="border border-gray-300 rounded-md p-3 bg-gray-50">
+            <div className="flex items-center justify-between">
+              <div className="bg-gray-200 h-12 w-32 flex items-center justify-center text-gray-500">
+                CAPTCHA
+              </div>
+              <Button size="sm" variant="outline">
+                Refresh
+              </Button>
+            </div>
+            <Input
+              id={element.id}
+              type="text"
+              className={`mt-2 ${errors[element.id] ? "border-red-500" : ""}`}
+              placeholder="Enter the code above"
+              required={element.required}
+              value={formData[element.id] || ""}
+              onChange={(e) => handleInputChange(element, e.target.value)}
+              variant="captcha"
+            />
+          </div>
         );
       case "textarea":
         return (
