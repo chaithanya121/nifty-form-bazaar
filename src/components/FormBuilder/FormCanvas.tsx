@@ -1,10 +1,9 @@
-
 import { FormCanvasProps, FormElement } from "./types";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Trash2, Send, Star, GripVertical, ArrowsHorizontal, ArrowsVertical } from "lucide-react";
+import { Trash2, Send, Star, GripVertical, MoveHorizontal, MoveVertical } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -201,7 +200,7 @@ const FormCanvas = ({ elements, setFormConfig, onSelectElement, selectedElement,
     }
   };
 
-  // Function to toggle element layout direction
+  // Replace instances of ArrowsHorizontal with MoveHorizontal
   const toggleElementsDirection = (ids: string[], makeRow: boolean) => {
     if (ids.length <= 1) {
       toast({
@@ -241,41 +240,6 @@ const FormCanvas = ({ elements, setFormConfig, onSelectElement, selectedElement,
       title: "Layout Updated",
       description: `Elements arranged in ${makeRow ? "row" : "column"} layout`,
     });
-  };
-
-  // Group elements by row layout
-  const groupElementsByLayout = (elements: FormElement[]) => {
-    const result: { row: string | null, elements: FormElement[] }[] = [];
-    const rowElements = new Map<string, FormElement[]>();
-    const standaloneElements: FormElement[] = [];
-    
-    // First, collect row elements
-    elements.forEach(element => {
-      if (element.layout?.inRow) {
-        const rowId = `row-${element.layout.rowPosition}-${element.id}`;
-        if (!rowElements.has(rowId)) {
-          rowElements.set(rowId, []);
-        }
-        rowElements.get(rowId)?.push(element);
-      } else {
-        standaloneElements.push(element);
-      }
-    });
-    
-    // Sort row elements by position
-    Array.from(rowElements.entries()).forEach(([rowId, elements]) => {
-      const sortedElements = elements.sort((a, b) => 
-        (a.layout?.rowPosition || 0) - (b.layout?.rowPosition || 0)
-      );
-      result.push({ row: rowId, elements: sortedElements });
-    });
-    
-    // Add standalone elements
-    standaloneElements.forEach(element => {
-      result.push({ row: null, elements: [element] });
-    });
-    
-    return result;
   };
 
   // Determine if element is selected for multiselect
@@ -341,11 +305,45 @@ const FormCanvas = ({ elements, setFormConfig, onSelectElement, selectedElement,
     }, 100);
   }, []);
 
+  // Group elements by row layout
+  const groupElementsByLayout = (elements: FormElement[]) => {
+    const result: { row: string | null, elements: FormElement[] }[] = [];
+    const rowElements = new Map<string, FormElement[]>();
+    const standaloneElements: FormElement[] = [];
+    
+    // First, collect row elements
+    elements.forEach(element => {
+      if (element.layout?.inRow) {
+        const rowId = `row-${element.layout.rowPosition}-${element.id}`;
+        if (!rowElements.has(rowId)) {
+          rowElements.set(rowId, []);
+        }
+        rowElements.get(rowId)?.push(element);
+      } else {
+        standaloneElements.push(element);
+      }
+    });
+    
+    // Sort row elements by position
+    Array.from(rowElements.entries()).forEach(([rowId, elements]) => {
+      const sortedElements = elements.sort((a, b) => 
+        (a.layout?.rowPosition || 0) - (b.layout?.rowPosition || 0)
+      );
+      result.push({ row: rowId, elements: sortedElements });
+    });
+    
+    // Add standalone elements
+    standaloneElements.forEach(element => {
+      result.push({ row: null, elements: [element] });
+    });
+    
+    return result;
+  };
+
   const groupedElements = groupElementsByLayout(elements);
 
   return (
     <div className="space-y-4" style={formConfig.settings.canvasStyles}>
-      {/* Multi-select controls */}
       {isSelectingMultiple && selectedElements.length > 0 && (
         <div className="flex items-center gap-2 p-2 bg-primary/20 rounded-md mb-4">
           <span>{selectedElements.length} elements selected</span>
@@ -354,7 +352,7 @@ const FormCanvas = ({ elements, setFormConfig, onSelectElement, selectedElement,
             onClick={() => toggleElementsDirection(selectedElements, true)}
             className="gap-1"
           >
-            <ArrowsHorizontal className="h-4 w-4" />
+            <MoveHorizontal className="h-4 w-4" />
             Arrange in Row
           </Button>
           <Button 
@@ -363,7 +361,7 @@ const FormCanvas = ({ elements, setFormConfig, onSelectElement, selectedElement,
             onClick={() => toggleElementsDirection(selectedElements, false)}
             className="gap-1"
           >
-            <ArrowsVertical className="h-4 w-4" />
+            <MoveVertical className="h-4 w-4" />
             Arrange in Column
           </Button>
         </div>

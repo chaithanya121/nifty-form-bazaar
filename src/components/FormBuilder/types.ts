@@ -1,3 +1,4 @@
+
 import React from "react";
 
 export type FormElementType =
@@ -91,11 +92,42 @@ export interface FormElement {
     inRow?: boolean;
     rowPosition?: number;
   };
+  validation?: {
+    minLength?: number;
+    maxLength?: number;
+    min?: number;
+    max?: number;
+    step?: number;
+    accept?: string;
+    maxSize?: number;
+    maxFiles?: number;
+  };
+  tooltip?: string;
+  inputType?: string;
+  submitData?: boolean;
 }
 
 export interface FormElementProps {
   element: FormElement;
   value: any;
   onChange: (value: any) => void;
+  error?: string;
+}
+
+// Add missing interfaces
+export interface ElementSettingsProps {
+  element: FormElement;
+  onUpdate: (element: FormElement) => void;
+  onClose: () => void;
+}
+
+export interface DragStartProps {
+  onDragStart: (e: React.DragEvent<HTMLDivElement>, elementType: string) => void;
+}
+
+export interface FormElementRendererProps {
+  element: FormElement;
+  value?: any;
+  onChange?: (value: any) => void;
   error?: string;
 }

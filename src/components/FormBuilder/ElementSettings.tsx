@@ -1,5 +1,3 @@
-
-
 import { ElementSettingsProps, FormElement } from "./types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,49 +9,57 @@ import { Button } from "@/components/ui/button";
 import { X, Type, Mail, Lock, Calendar, CheckSquare, Check, List, Upload, Radio, Grid, Table2, 
   ToggleLeft, Sliders, Image, Images, FileWarning, AlertTriangle, Heading1, Heading2, Heading3, 
   Heading4, AlignLeft, Quote, Link2, SeparatorHorizontal, Code, Rows, LayoutGrid, Container, 
-  Columns2, Columns3, Columns4, ListTree,ChevronDown, ChevronUp } from "lucide-react";
+  Columns2, Columns3, Columns4, ListTree, ChevronDown, ChevronUp } from "lucide-react";
   
-  import { useState } from "react";
+import { useState } from "react";
 
-  const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) => {
-
+const ElementSettings = ({ element, onUpdate, onClose }: ElementSettingsProps) => {
+  const [isLabelStylingExpanded, setIsLabelStylingExpanded] = useState(true); // Default: expanded
+  const [isFieldStylingExpanded, setIsFieldStylingExpanded] = useState(false); 
+  
+  // Helper function to safely extract numerical values from style properties
+  const getStyleValue = (value: string | number | undefined): string => {
+    if (value === undefined) return '';
     
-
-    const [isLabelStylingExpanded, setIsLabelStylingExpanded] = useState(true); // Default: expanded
-    const [isFieldStylingExpanded, setIsFieldStylingExpanded] = useState(false); 
+    if (typeof value === 'string' && value.includes('px')) {
+      return value.replace('px', '');
+    }
     
-    const handleInputChange = (field: string, value: any) => {
-      onUpdate({ ...element, [field]: value });
-    };
+    return String(value);
+  };
   
-    const handleOptionsChange = (options: string[]) => {
-      const updatedElement: FormElement = {
-        ...element,
-        options: options || [], // Ensure options is always an array
-        value: element.value || (options.length > 0 ? options[0] : undefined),
-      };
-      onUpdate(updatedElement);
+  const handleInputChange = (field: string, value: any) => {
+    onUpdate({ ...element, [field]: value });
+  };
+
+  const handleOptionsChange = (options: string[]) => {
+    const updatedElement: FormElement = {
+      ...element,
+      options: options || [], // Ensure options is always an array
+      value: element.value || (options.length > 0 ? options[0] : undefined),
     };
+    onUpdate(updatedElement);
+  };
   
-    const addOption = () => {
-      const currentOptions = Array.isArray(element.options) ? element.options : []; // Fallback to empty array
-      const newOptionIndex = currentOptions.length + 1;
-      const newOption = `Option ${newOptionIndex}`;
-      handleOptionsChange([...currentOptions, newOption]);
-    };
+  const addOption = () => {
+    const currentOptions = Array.isArray(element.options) ? element.options : []; // Fallback to empty array
+    const newOptionIndex = currentOptions.length + 1;
+    const newOption = `Option ${newOptionIndex}`;
+    handleOptionsChange([...currentOptions, newOption]);
+  };
   
-    const updateOption = (index: number, value: string) => {
-      const currentOptions = Array.isArray(element.options) ? [...element.options] : [];
-      currentOptions[index] = value.trim() || `Option ${index + 1}`;
-      handleOptionsChange(currentOptions);
-    };
+  const updateOption = (index: number, value: string) => {
+    const currentOptions = Array.isArray(element.options) ? [...element.options] : [];
+    currentOptions[index] = value.trim() || `Option ${index + 1}`;
+    handleOptionsChange(currentOptions);
+  };
   
-    const removeOption = (index: number) => {
-      if (!Array.isArray(element.options)) return;
-      const currentOptions = [...element.options];
-      currentOptions.splice(index, 1);
-      handleOptionsChange(currentOptions);
-    };
+  const removeOption = (index: number) => {
+    if (!Array.isArray(element.options)) return;
+    const currentOptions = [...element.options];
+    currentOptions.splice(index, 1);
+    handleOptionsChange(currentOptions);
+  };
   
 
     const handleLabelStyleChange = (field: string, value: string) => {
@@ -200,37 +206,6 @@ import { X, Type, Mail, Lock, Calendar, CheckSquare, Check, List, Upload, Radio,
                   ))}
               </div>
             )}
-            {/* {hasOptions && (
-              <div className="space-y-4 mt-6 pt-6 border-t border-gray-700">
-                <Label className="text-lg text-white">Options</Label>
-                <Button
-                  onClick={addOption}
-                  variant="outline"
-                  className="w-full bg-gray-800 text-white hover:bg-gray-700"
-                >
-                  Add Option
-                </Button>
-                {Array.isArray(element.options) &&
-                  element.options.map((option, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <Input
-                        value={option}
-                        onChange={(e) => updateOption(index, e.target.value)}
-                        placeholder={`Option ${index + 1}`}
-                        className="bg-gray-800 text-white"
-                      />
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        onClick={() => removeOption(index)}
-                        className="hover:bg-red-600"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-              </div>
-            )} */}
 
             {isStructureElement && (
               <>
@@ -289,7 +264,7 @@ import { X, Type, Mail, Lock, Calendar, CheckSquare, Check, List, Upload, Radio,
           <Label className="text-white">Label Margin</Label>
           <Input
           type="number"
-            value={element.labelStyles?.margin?.replace("px", "") || ""}
+            value={getStyleValue(element.labelStyles?.margin)}
             onChange={(e) => handleLabelStyleChange("margin",  `${e.target.value}px`)}
             placeholder="e.g., 10"
             className="bg-gray-800 text-white"
@@ -299,7 +274,7 @@ import { X, Type, Mail, Lock, Calendar, CheckSquare, Check, List, Upload, Radio,
           <Label className="text-white">Label Padding</Label>
           <Input
           type="number"
-            value={element.labelStyles?.padding?.replace("px", "") || ""}
+            value={getStyleValue(element.labelStyles?.padding)}
             onChange={(e) => handleLabelStyleChange("padding",  `${e.target.value}px`)}
             placeholder="e.g., 10"
             className="bg-gray-800 text-white"
@@ -309,7 +284,7 @@ import { X, Type, Mail, Lock, Calendar, CheckSquare, Check, List, Upload, Radio,
           <Label className="text-white">Label Font Size</Label>
           <Input
           type="number"
-            value={element.labelStyles?.fontSize?.replace("px", "") || ""}
+            value={getStyleValue(element.labelStyles?.fontSize)}
             onChange={(e) => handleLabelStyleChange("fontSize",  `${e.target.value}px`)}
             placeholder="e.g., 16"
             className="bg-gray-800 text-white"
@@ -355,7 +330,7 @@ import { X, Type, Mail, Lock, Calendar, CheckSquare, Check, List, Upload, Radio,
           <Label className="text-white">Field Margin</Label>
           <Input
           type="number"
-            value={element.fieldStyles?.margin?.replace("px", "") || ""}
+            value={getStyleValue(element.fieldStyles?.margin)}
             onChange={(e) => handleFieldStyleChange("margin",  `${e.target.value}px`)}
             placeholder="e.g., 10"
             className="bg-gray-800 text-white"
@@ -365,7 +340,7 @@ import { X, Type, Mail, Lock, Calendar, CheckSquare, Check, List, Upload, Radio,
           <Label className="text-white">Field Padding</Label>
           <Input
           type="number"
-            value={element.fieldStyles?.padding?.replace("px", "") || ""}
+            value={getStyleValue(element.fieldStyles?.padding)}
             onChange={(e) => handleFieldStyleChange("padding",  `${e.target.value}px`)}
             placeholder="e.g., 10"
             className="bg-gray-800 text-white"
@@ -375,7 +350,7 @@ import { X, Type, Mail, Lock, Calendar, CheckSquare, Check, List, Upload, Radio,
           <Label className="text-white">Field Width</Label>
           <Input  
           type="number"
-            value={element.fieldStyles?.width?.replace("px", "") || ""}
+            value={getStyleValue(element.fieldStyles?.width)}
             onChange={(e) => handleFieldStyleChange("width",  `${e.target.value}px`)}
             placeholder="e.g., 100%"
             className="bg-gray-800 text-white"
@@ -385,7 +360,7 @@ import { X, Type, Mail, Lock, Calendar, CheckSquare, Check, List, Upload, Radio,
           <Label className="text-white">Field Height</Label>
           <Input  
           type="number"
-            value={element.fieldStyles?.height?.replace("px", "") || ""}
+            value={getStyleValue(element.fieldStyles?.height)}
             onChange={(e) => handleFieldStyleChange("height",  `${e.target.value}px`)}
             placeholder="e.g., 50"
             className="bg-gray-800 text-white"
@@ -413,7 +388,7 @@ import { X, Type, Mail, Lock, Calendar, CheckSquare, Check, List, Upload, Radio,
           <Label className="text-white">Field Border Radius</Label>
           <Input
           type="number"
-            value={element.fieldStyles?.borderRadius?.replace("px", "") || ""}
+            value={getStyleValue(element.fieldStyles?.borderRadius)}
             onChange={(e) => handleFieldStyleChange("borderRadius",  `${e.target.value}px`)}
             placeholder="e.g., 5"
             className="bg-gray-800 text-white"
@@ -423,7 +398,7 @@ import { X, Type, Mail, Lock, Calendar, CheckSquare, Check, List, Upload, Radio,
           <Label className="text-white">Field Font Size</Label>
           <Input  
           type="number"
-            value={element.fieldStyles?.fontSize?.replace("px", "") || ""}
+            value={getStyleValue(element.fieldStyles?.fontSize)}
             onChange={(e) => handleFieldStyleChange("fontSize",  `${e.target.value}px`)}
             placeholder="e.g., 16"
             className="bg-gray-800 text-white"
