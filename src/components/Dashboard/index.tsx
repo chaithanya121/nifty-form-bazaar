@@ -29,8 +29,8 @@ import { useToast } from '@/hooks/use-toast';
 interface FormData {
   id: string;
   name: string;
-  createdAt: Date;
-  lastModified: Date;
+  createdAt: string | Date;
+  lastModified: string | Date;
   submissions: number;
   config: FormConfig;
 }
@@ -49,56 +49,33 @@ const Dashboard = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Simulated data - replace with actual API calls
-    const mockForms: FormData[] = Array.from({ length: 8 }, (_, i) => ({
-      id: `form-${i + 1}`,
-      name: `Customer Feedback Form ${i + 1}`,
-      createdAt: new Date(Date.now() - Math.random() * 10000000000),
-      lastModified: new Date(Date.now() - Math.random() * 1000000000),
-      submissions: Math.floor(Math.random() * 100),
-      config: {
-        name: `Customer Feedback Form ${i + 1}`,
-        elements: [],
-        settings: {
-          termsAndConditions: {
-            enabled: true,
-            required: true,
-            text: "I accept the Terms & Conditions & Privacy Policy",
-          },
-          submitButton: {
-            enabled: true,
-            text: "Submit",
-          },
-          preview: {
-            width: "Full",
-            nesting: true,
-          },
-          validation: {
-            liveValidation: "Default",
-          },
-          layout: {
-            size: "Default",
-            columns: {
-              default: true,
-              tablet: false,
-              desktop: false,
-            },
-            labels: "Default",
-            placeholders: "Default",
-            errors: "Default",
-            messages: "Default",
-          },
-        },
+    // Load forms from localStorage
+    const storedFormsJson = localStorage.getItem('nifty-forms');
+    let storedForms: FormData[] = [];
+    
+    if (storedFormsJson) {
+      try {
+        storedForms = JSON.parse(storedFormsJson);
+      } catch (error) {
+        console.error('Error parsing stored forms:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load saved forms",
+          variant: "destructive"
+        });
       }
-    }));
-
-    setForms(mockForms);
+    }
+    
+    // If no stored forms are found, use empty array
+    setForms(storedForms || []);
+    
+    // Update stats based on loaded forms
     setStats({
-      totalForms: mockForms.length,
-      totalSubmissions: mockForms.reduce((acc, form) => acc + form.submissions, 0),
-      activeUsers: Math.floor(Math.random() * 100)
+      totalForms: storedForms.length,
+      totalSubmissions: storedForms.reduce((acc, form) => acc + form.submissions, 0),
+      activeUsers: Math.floor(Math.random() * 100) // This is still mock data since we don't track real users
     });
-  }, []);
+  }, [toast]);
 
   const handleCreateForm = () => {
     if (!newFormName.trim()) {
@@ -113,8 +90,8 @@ const Dashboard = () => {
     const newForm: FormData = {
       id: `form-${Date.now()}`,
       name: newFormName,
-      createdAt: new Date(),
-      lastModified: new Date(),
+      createdAt: new Date().toISOString(),
+      lastModified: new Date().toISOString(),
       submissions: 0,
       config: {
         name: newFormName,
@@ -152,7 +129,13 @@ const Dashboard = () => {
       }
     };
 
-    setForms(prev => [newForm, ...prev]);
+    // Update state
+    const updatedForms = [newForm, ...forms];
+    setForms(updatedForms);
+    
+    // Update localStorage
+    localStorage.setItem('nifty-forms', JSON.stringify(updatedForms));
+    
     setStats(prev => ({
       ...prev,
       totalForms: prev.totalForms + 1
@@ -163,7 +146,13 @@ const Dashboard = () => {
   };
 
   const handleDeleteForm = (formId: string) => {
-    setForms(prev => prev.filter(form => form.id !== formId));
+    // Remove from state
+    const updatedForms = forms.filter(form => form.id !== formId);
+    setForms(updatedForms);
+    
+    // Update localStorage
+    localStorage.setItem('nifty-forms', JSON.stringify(updatedForms));
+    
     setStats(prev => ({
       ...prev,
       totalForms: prev.totalForms - 1
@@ -179,12 +168,18 @@ const Dashboard = () => {
       ...form,
       id: `form-${Date.now()}`,
       name: `${form.name} (Copy)`,
-      createdAt: new Date(),
-      lastModified: new Date(),
+      createdAt: new Date().toISOString(),
+      lastModified: new Date().toISOString(),
       submissions: 0
     };
 
-    setForms(prev => [duplicatedForm, ...prev]);
+    // Update state
+    const updatedForms = [duplicatedForm, ...forms];
+    setForms(updatedForms);
+    
+    // Update localStorage
+    localStorage.setItem('nifty-forms', JSON.stringify(updatedForms));
+    
     setStats(prev => ({
       ...prev,
       totalForms: prev.totalForms + 1
@@ -195,6 +190,22 @@ const Dashboard = () => {
     });
   };
 
+  const formatDate = (dateValue: string | Date): string => {
+    if (!dateValue) return 'Unknown date';
+    
+    if (typeof dateValue === 'string') {
+      // Parse the ISO string to a Date object
+      const date = new Date(dateValue);
+      if (isNaN(date.getTime())) {
+        return 'Invalid date';
+      }
+      return date.toLocaleDateString();
+    }
+    
+    // It's already a Date object
+    return dateValue.toLocaleDateString();
+  };
+
   const filteredForms = forms.filter(form => 
     form.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -202,6 +213,7 @@ const Dashboard = () => {
   return (
     <SidebarProvider>
       <div className="flex h-screen bg-background">
+        {/* Sidebar */}
         <Sidebar defaultWidth={250} variant="sidebar">
           <SidebarContent>
             <div className="flex flex-col gap-4 p-4">
@@ -225,6 +237,7 @@ const Dashboard = () => {
           </SidebarContent>
         </Sidebar>
 
+        {/* Main Content */}
         <div className="flex-1 p-6 overflow-auto">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold">Dashboard</h1>
@@ -260,6 +273,7 @@ const Dashboard = () => {
             </Dialog>
           </div>
 
+          {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <Card className="p-6">
               <h3 className="text-sm font-medium text-muted-foreground">Total Forms</h3>
@@ -275,6 +289,7 @@ const Dashboard = () => {
             </Card>
           </div>
 
+          {/* Recent Forms */}
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold">Your Forms</h2>
@@ -290,7 +305,7 @@ const Dashboard = () => {
                 <Card key={form.id} className="p-4 hover:shadow-lg transition-shadow">
                   <h3 className="font-medium mb-2">{form.name}</h3>
                   <p className="text-sm text-muted-foreground mb-2">
-                    Last modified {form.lastModified.toLocaleDateString()}
+                    Last modified {formatDate(form.lastModified)}
                   </p>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">

@@ -23,6 +23,7 @@ const App = () => {
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/forms" element={<Index />} />
                 <Route path="/create" element={<FormBuilder />} />
+                <Route path="/form-builder/:id" element={<FormBuilder />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>

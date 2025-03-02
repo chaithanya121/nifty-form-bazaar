@@ -1,4 +1,4 @@
-import { DragEvent, useState } from "react";
+import { DragEvent, useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { FormElement, FormConfig, FormElementType } from "./types";
 import FormElementLibrary from "./FormElementLibrary";
@@ -6,12 +6,13 @@ import FormCanvas from "./FormCanvas";
 import FormPreview from "./FormPreview";
 import ElementSettings from "./ElementSettings";
 import { Button } from "@/components/ui/button";
-import { Eye, Code } from "lucide-react";
+import { Eye, Code, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../ui/tabs";
+import { useNavigate, useParams } from "react-router-dom";
 
 const DEFAULT_CONFIG: FormConfig = {
   name: "Create account",
@@ -48,8 +49,6 @@ const DEFAULT_CONFIG: FormConfig = {
   },
 };
 
-
-
 const PRESET_STYLES = {
   "Light Theme": {
     backgroundColor: "#ffffff",
@@ -74,14 +73,58 @@ const PRESET_STYLES = {
   },
 };
 
-
-
-
 const FormBuilder = () => {
   const [formConfig, setFormConfig] = useState<FormConfig>(DEFAULT_CONFIG);
   const [previewMode, setPreviewMode] = useState(false);
   const [selectedElement, setSelectedElement] = useState<FormElement | undefined>();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const formInitialized = useRef(false);
+
+  // Load form data if editing an existing form
+  useEffect(() => {
+    if (id && !formInitialized.current) {
+      // Set the initialization flag to prevent infinite loops
+      formInitialized.current = true;
+      
+      try {
+        // Get forms from localStorage
+        const storedFormsJson = localStorage.getItem('nifty-forms');
+        if (storedFormsJson) {
+          const storedForms = JSON.parse(storedFormsJson);
+          
+          // Find the form with the matching ID
+          const formToEdit = storedForms.find((form: any) => form.id === id);
+          
+          if (formToEdit) {
+            // Set the form configuration
+            setFormConfig(formToEdit.config);
+            
+            toast({
+              title: "Form Loaded",
+              description: `Editing form: ${formToEdit.name}`,
+            });
+          } else {
+            // Form not found, show error and navigate back
+            toast({
+              title: "Error",
+              description: "Form not found",
+              variant: "destructive"
+            });
+            navigate('/');
+          }
+        }
+      } catch (error) {
+        console.error('Error loading form:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load form data",
+          variant: "destructive"
+        });
+      }
+    }
+  }, [id, navigate, toast]);
 
   const handleDragStart = (e: DragEvent<HTMLDivElement>, elementType: string) => {
     e.dataTransfer.setData("elementType", elementType);
@@ -169,6 +212,47 @@ const FormBuilder = () => {
     }));
   };
 
+  const handleSaveForm = () => {
+    // If this is a new form being created, we would typically generate an ID
+    const formId = id || `form-${Date.now()}`;
+    
+    // Get existing forms from localStorage or initialize an empty array
+    const existingFormsJson = localStorage.getItem('nifty-forms');
+    const existingForms = existingFormsJson ? JSON.parse(existingFormsJson) : [];
+    
+    // Check if the form already exists in localStorage
+    const formIndex = existingForms.findIndex((form: any) => form.id === formId);
+    
+    // Create or update the form object
+    const formObject = {
+      id: formId,
+      name: formConfig.name,
+      // Store dates as ISO strings for consistent serialization
+      createdAt: formIndex >= 0 ? existingForms[formIndex].createdAt : new Date().toISOString(),
+      lastModified: new Date().toISOString(),
+      submissions: formIndex >= 0 ? existingForms[formIndex].submissions : 0,
+      config: formConfig
+    };
+    
+    // Update or add the form in the forms array
+    if (formIndex >= 0) {
+      existingForms[formIndex] = formObject;
+    } else {
+      existingForms.push(formObject);
+    }
+    
+    // Save the updated forms array back to localStorage
+    localStorage.setItem('nifty-forms', JSON.stringify(existingForms));
+    
+    toast({
+      title: "Form Saved",
+      description: "Your form has been saved successfully",
+    });
+    
+    // Navigate back to the dashboard
+    navigate('/');
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       <div className="container mx-auto p-4">
@@ -190,6 +274,13 @@ const FormBuilder = () => {
             <Button variant="outline" onClick={() => setPreviewMode(!previewMode)} className="gap-2 bg-gray-800 text-white hover:bg-gray-700">
               {previewMode ? <Code /> : <Eye />}
               {previewMode ? "Edit" : "Preview"}
+            </Button>
+            <Button 
+              onClick={handleSaveForm} 
+              className="gap-2 bg-green-600 text-white hover:bg-green-700"
+            >
+              <Save className="h-4 w-4" />
+              Save Form
             </Button>
           </div>
         </div>
@@ -223,217 +314,145 @@ const FormBuilder = () => {
                     onClose={() => setSelectedElement(undefined)}
                   />
                 ) : (
-                  // <div className="space-y-4">
-                  //   <h4 className="text-lg font-semibold text-white">Canvas Styling</h4>
-
-                  //   {/* Preset Styles Dropdown */}
-                  //   <div className="space-y-2">
-                  //     <Label className="text-white">Preset Styles</Label>
-                  //     <Select onValueChange={(value) => applyPresetStyle(value)}>
-                  //       <SelectTrigger className="bg-gray-800 text-white">
-                  //         <SelectValue placeholder="Select a preset style" />
-                  //       </SelectTrigger>
-                  //       <SelectContent>
-                  //         {Object.keys(PRESET_STYLES).map((presetName) => (
-                  //           <SelectItem key={presetName} value={presetName}>
-                  //             {presetName}
-                  //           </SelectItem>
-                  //         ))}
-                  //       </SelectContent>
-                  //     </Select>
-                  //   </div>
-
-                  //   {/* Custom Canvas Styling */}
-                  //   <div className="space-y-4">
-                  //     <div className="space-y-2">
-                  //       <Label className="text-white">Background Color</Label>
-                  //       <Input
-                  //         value={formConfig.settings.canvasStyles?.backgroundColor || ""}
-                  //         onChange={(e) => handleCanvasStyleChange("backgroundColor", e.target.value)}
-                  //         placeholder="e.g., #ffffff"
-                  //         className="bg-gray-800 text-white"
-                  //       />
-                  //     </div>
-                  //     <div className="space-y-2">
-                  //       <Label className="text-white">Background Image</Label>
-                  //       <Input
-                  //         value={formConfig.settings.canvasStyles?.backgroundImage || ""}
-                  //         onChange={(e) => handleCanvasStyleChange("backgroundImage", e.target.value)}
-                  //         placeholder="e.g., https://example.com/image.jpg"
-                  //         className="bg-gray-800 text-white"
-                  //       />
-                  //     </div>
-                  //     <div className="space-y-2">
-                  //       <Label className="text-white">Padding</Label>
-                  //       <Input
-                  //         type="number"
-                  //         value={formConfig.settings.canvasStyles?.padding?.replace("px", "") || ""}
-                  //         onChange={(e) => handleCanvasStyleChange("padding", `${e.target.value}px`)}
-                  //         placeholder="e.g., 10"
-                  //         className="bg-gray-800 text-white"
-                  //       />
-                  //     </div>
-                  //     <div className="space-y-2">
-                  //       <Label className="text-white">Margin</Label>
-                  //       <Input
-                  //         type="number"
-                  //         value={formConfig.settings.canvasStyles?.margin?.replace("px", "") || ""}
-                  //         onChange={(e) => handleCanvasStyleChange("margin", `${e.target.value}px`)}
-                  //         placeholder="e.g., 10"
-                  //         className="bg-gray-800 text-white"
-                  //       />
-                  //     </div>
-                  //     <div className="space-y-2">
-                  //       <Label className="text-white">Border Radius</Label>
-                  //       <Input
-                  //         type="number"
-                  //         value={formConfig.settings.canvasStyles?.borderRadius?.replace("px", "") || ""}
-                  //         onChange={(e) => handleCanvasStyleChange("borderRadius", `${e.target.value}px`)}
-                  //         placeholder="e.g., 5"
-                  //         className="bg-gray-800 text-white"
-                  //       />
-                  //     </div>
-                  //   </div>
-                  // </div>
                   <Tabs defaultValue="canvas-styling">
-      <TabsList   className="bg-gray-700 mb-4"
-                style={{ width: "fit-content", gap: "13px" }}
-                > 
-        <TabsTrigger value="canvas-styling">Canvas Styling</TabsTrigger>
-        <TabsTrigger value="import">Import</TabsTrigger>
-      </TabsList>
+                    <TabsList   className="bg-gray-700 mb-4"
+                      style={{ width: "fit-content", gap: "13px" }}
+                    > 
+                      <TabsTrigger value="canvas-styling">Canvas Styling</TabsTrigger>
+                      <TabsTrigger value="import">Import</TabsTrigger>
+                    </TabsList>
 
-      {/* Canvas Styling Tab */}
-      <TabsContent value="canvas-styling" className="space-y-4">
-        <h4 className="text-lg font-semibold text-white">Canvas Styling</h4>
+                    {/* Canvas Styling Tab */}
+                    <TabsContent value="canvas-styling" className="space-y-4">
+                      <h4 className="text-lg font-semibold text-white">Canvas Styling</h4>
 
-        {/* Preset Styles Dropdown */}
-        <div className="space-y-2">
-          <Label className="text-white">Preset Styles</Label>
-          <Select onValueChange={(value) => applyPresetStyle(value)}>
-            <SelectTrigger className="bg-gray-800 text-white">
-              <SelectValue placeholder="Select a preset style" />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.keys(PRESET_STYLES).map((presetName) => (
-                <SelectItem key={presetName} value={presetName}>
-                  {presetName}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+                      {/* Preset Styles Dropdown */}
+                      <div className="space-y-2">
+                        <Label className="text-white">Preset Styles</Label>
+                        <Select onValueChange={(value) => applyPresetStyle(value)}>
+                          <SelectTrigger className="bg-gray-800 text-white">
+                            <SelectValue placeholder="Select a preset style" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Object.keys(PRESET_STYLES).map((presetName) => (
+                              <SelectItem key={presetName} value={presetName}>
+                                {presetName}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-        {/* Custom Canvas Styling */}
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label className="text-white">Background Color</Label>
-            <Input
-              value={formConfig.settings.canvasStyles?.backgroundColor || ""}
-              onChange={(e) => handleCanvasStyleChange("backgroundColor", e.target.value)}
-              placeholder="e.g., #ffffff"
-              className="bg-gray-800 text-white"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-white">Background Image</Label>
-            <Input
-              value={formConfig.settings.canvasStyles?.backgroundImage || ""}
-              onChange={(e) => handleCanvasStyleChange("backgroundImage", e.target.value)}
-              placeholder="e.g., https://example.com/image.jpg"
-              className="bg-gray-800 text-white"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-white">Padding</Label>
-            <Input
-              type="number"
-              value={getStyleStringValue(formConfig.settings.canvasStyles?.padding)}
-              onChange={(e) => handleCanvasStyleChange("padding", `${e.target.value}px`)}
-              placeholder="e.g., 10"
-              className="bg-gray-800 text-white"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-white">Margin</Label>
-            <Input
-              type="number"
-              value={getStyleStringValue(formConfig.settings.canvasStyles?.margin)}
-              onChange={(e) => handleCanvasStyleChange("margin", `${e.target.value}px`)}
-              placeholder="e.g., 10"
-              className="bg-gray-800 text-white"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-white">Border Radius</Label>
-            <Input
-              type="number"
-              value={getStyleStringValue(formConfig.settings.canvasStyles?.borderRadius)}
-              onChange={(e) => handleCanvasStyleChange("borderRadius", `${e.target.value}px`)}
-              placeholder="e.g., 5"
-              className="bg-gray-800 text-white"
-            />
-          </div>
-        </div>
-      </TabsContent>
+                      {/* Custom Canvas Styling */}
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label className="text-white">Background Color</Label>
+                          <Input
+                            value={formConfig.settings.canvasStyles?.backgroundColor || ""}
+                            onChange={(e) => handleCanvasStyleChange("backgroundColor", e.target.value)}
+                            placeholder="e.g., #ffffff"
+                            className="bg-gray-800 text-white"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-white">Background Image</Label>
+                          <Input
+                            value={formConfig.settings.canvasStyles?.backgroundImage || ""}
+                            onChange={(e) => handleCanvasStyleChange("backgroundImage", e.target.value)}
+                            placeholder="e.g., https://example.com/image.jpg"
+                            className="bg-gray-800 text-white"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-white">Padding</Label>
+                          <Input
+                            type="number"
+                            value={getStyleStringValue(formConfig.settings.canvasStyles?.padding)}
+                            onChange={(e) => handleCanvasStyleChange("padding", `${e.target.value}px`)}
+                            placeholder="e.g., 10"
+                            className="bg-gray-800 text-white"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-white">Margin</Label>
+                          <Input
+                            type="number"
+                            value={getStyleStringValue(formConfig.settings.canvasStyles?.margin)}
+                            onChange={(e) => handleCanvasStyleChange("margin", `${e.target.value}px`)}
+                            placeholder="e.g., 10"
+                            className="bg-gray-800 text-white"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-white">Border Radius</Label>
+                          <Input
+                            type="number"
+                            value={getStyleStringValue(formConfig.settings.canvasStyles?.borderRadius)}
+                            onChange={(e) => handleCanvasStyleChange("borderRadius", `${e.target.value}px`)}
+                            placeholder="e.g., 5"
+                            className="bg-gray-800 text-white"
+                          />
+                        </div>
+                      </div>
+                    </TabsContent>
 
-      {/* Import Tab */}
-      <TabsContent value="import" className="space-y-4">
-        <h4 className="text-lg font-semibold text-white">Import</h4>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label className="text-white">Import JSON</Label>
-            <Input
-              type="file"
-              accept=".json"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  const reader = new FileReader();
-                  reader.onload = (event) => {
-                    try {
-                      const importedConfig = JSON.parse(event.target?.result as string);
-                      setFormConfig(importedConfig);
-                      toast({
-                        title: "Import Successful",
-                        description: "Form configuration has been imported.",
-                      });
-                    } catch (error) {
-                      toast({
-                        title: "Import Failed",
-                        description: "Invalid JSON file.",
-                        variant: "destructive",
-                      });
-                    }
-                  };
-                  reader.readAsText(file);
-                }
-              }}
-              className="bg-gray-800 text-white"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-white">Export JSON</Label>
-            <Button
-              variant="outline"
-              className="w-full bg-gray-800 text-white hover:bg-gray-700"
-              onClick={() => {
-                const jsonString = JSON.stringify(formConfig, null, 2);
-                const blob = new Blob([jsonString], { type: "application/json" });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "form-config.json";
-                a.click();
-                URL.revokeObjectURL(url);
-              }}
-            >
-              Export Configuration
-            </Button>
-          </div>
-        </div>
-      </TabsContent>
-    </Tabs>
+                    {/* Import Tab */}
+                    <TabsContent value="import" className="space-y-4">
+                      <h4 className="text-lg font-semibold text-white">Import</h4>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label className="text-white">Import JSON</Label>
+                          <Input
+                            type="file"
+                            accept=".json"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onload = (event) => {
+                                  try {
+                                    const importedConfig = JSON.parse(event.target?.result as string);
+                                    setFormConfig(importedConfig);
+                                    toast({
+                                      title: "Import Successful",
+                                      description: "Form configuration has been imported.",
+                                    });
+                                  } catch (error) {
+                                    toast({
+                                      title: "Import Failed",
+                                      description: "Invalid JSON file.",
+                                      variant: "destructive",
+                                    });
+                                  }
+                                };
+                                reader.readAsText(file);
+                              }
+                            }}
+                            className="bg-gray-800 text-white"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-white">Export JSON</Label>
+                          <Button
+                            variant="outline"
+                            className="w-full bg-gray-800 text-white hover:bg-gray-700"
+                            onClick={() => {
+                              const jsonString = JSON.stringify(formConfig, null, 2);
+                              const blob = new Blob([jsonString], { type: "application/json" });
+                              const url = URL.createObjectURL(blob);
+                              const a = document.createElement("a");
+                              a.href = url;
+                              a.download = "form-config.json";
+                              a.click();
+                              URL.revokeObjectURL(url);
+                            }}
+                          >
+                            Export Configuration
+                          </Button>
+                        </div>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
                 )}
               </Card>
             </>
