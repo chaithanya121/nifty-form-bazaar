@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 const Header = () => {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center">
+      <div className="w-full flex h-16 items-center">
         <div className="mr-8 flex items-center">
           <Button variant="ghost" size="icon" className="mr-2 md:hidden">
             <Menu className="h-5 w-5" />

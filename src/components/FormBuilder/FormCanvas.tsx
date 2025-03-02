@@ -357,7 +357,1019 @@ const FormCanvas = ({ elements, setFormConfig, onSelectElement, selectedElement,
         return null;
     }
   };
+  const renderElement = () => {
+    switch (element.type) {
+      case "text":
+      case "email":
+      case "password":
+      case "street-address":
+      case "street-address-line2":
+      case "city":
+      case "state-province":
+      case "postal-code":
+      case "first-name":
+      case "last-name":
+      case "phone":
+        return (
+          <Input
+            type={element.type === "phone" ? "tel" : element.type}
+            id={element.id}
+            value={value || ""}
+            onChange={handleChange}
+            placeholder={element.placeholder}
+            required={element.required}
+            style={element.fieldStyles}
+          />
+        );
 
+      case "textarea":
+        return (
+          <Textarea
+            id={element.id}
+            value={value || ""}
+            onChange={handleChange}
+            placeholder={element.placeholder}
+            required={element.required}
+            style={element.fieldStyles}
+          />
+        );
+
+      case "select":
+      case "multiselect":
+        return (
+          <Select 
+            value={value || (element.type === "multiselect" ? [] : "")}
+            onValueChange={onChange}
+            multiple={element.type === "multiselect"}
+          >
+            <SelectTrigger className="w-full" style={element.fieldStyles}>
+              <SelectValue 
+                placeholder={element.placeholder || "Select an option"} 
+                className="w-full"
+              />
+            </SelectTrigger>
+            <SelectContent>
+              {(element.options || []).map((option) => (
+                <SelectItem key={option} value={option}>
+                  {option}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+
+      case "checkbox":
+        return (
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id={element.id}
+              checked={value || false}
+              onCheckedChange={onChange}
+              style={element.fieldStyles}
+            />
+            <label
+              htmlFor={element.id}
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              {element.placeholder || element.label}
+            </label>
+          </div>
+        );
+
+      case "checkbox-group":
+      case "checkbox-blocks":
+      case "checkbox-tabs":
+        const checkboxOptions = element.options || [];
+        return (
+          <div className={`
+            ${element.type === "checkbox-blocks" ? "grid grid-cols-2 gap-4" : "space-y-2"}
+            ${element.type === "checkbox-tabs" ? "flex flex-wrap gap-2" : ""}
+          `}>
+            {checkboxOptions.map((option) => (
+              <div
+                key={option}
+                className={`
+                  ${element.type === "checkbox-blocks" 
+                    ? "border rounded-lg p-4 hover:bg-accent transition-colors" 
+                    : element.type === "checkbox-tabs"
+                    ? "min-w-[120px]"
+                    : ""
+                  }
+                  ${element.type === "checkbox-tabs" && (value || []).includes(option)
+                    ? "bg-primary text-primary-foreground"
+                    : ""
+                  }
+                `}
+              >
+                {element.type === "checkbox-tabs" ? (
+                  <button
+                    type="button"
+                    className="w-full px-4 py-2 rounded-md text-sm font-medium"
+                    onClick={() => {
+                      const newValue = (value || []).includes(option)
+                        ? (value || []).filter((v: string) => v !== option)
+                        : [...(value || []), option];
+                      onChange(newValue);
+                    }}
+                  >
+                    {option}
+                  </button>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`${element.id}-${option}`}
+                      checked={(value || []).includes(option)}
+                      onCheckedChange={(checked) => {
+                        const newValue = checked
+                          ? [...(value || []), option]
+                          : (value || []).filter((v: string) => v !== option);
+                        onChange(newValue);
+                      }}
+                    />
+                    <label
+                      htmlFor={`${element.id}-${option}`}
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      {option}
+                    </label>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        );
+
+      case "radio":
+      case "radio-group":
+      case "radio-blocks":
+      case "radio-tabs":
+        const radioOptions = element.options || [];
+        return (
+          <RadioGroup value={value || ""} onValueChange={onChange}>
+            <div className={`
+              ${element.type === "radio-blocks" ? "grid grid-cols-2 gap-4" : "space-y-2"}
+              ${element.type === "radio-tabs" ? "flex flex-wrap gap-2" : ""}
+            `}>
+              {radioOptions.map((option) => (
+                <div
+                  key={option}
+                  className={`
+                    ${element.type === "radio-blocks" 
+                      ? "border rounded-lg p-4 hover:bg-accent transition-colors cursor-pointer" 
+                      : element.type === "radio-tabs"
+                      ? "min-w-[120px]"
+                      : ""
+                    }
+                    ${element.type === "radio-tabs" && value === option
+                      ? "bg-primary text-primary-foreground"
+                      : ""
+                    }
+                  `}
+                >
+                  {element.type === "radio-tabs" ? (
+                    <button
+                      type="button"
+                      className="w-full px-4 py-2 rounded-md text-sm font-medium"
+                      onClick={() => onChange(option)}
+                    >
+                      {option}
+                    </button>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value={option} id={`${element.id}-${option}`} />
+                      <Label
+                        htmlFor={`${element.id}-${option}`}
+                        className="text-sm font-medium leading-none cursor-pointer"
+                      >
+                        {option}
+                      </Label>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </RadioGroup>
+        );
+
+      case "date":
+      case "date-range":
+        if (element.type === "date-range") {
+          return (
+            <div className="flex space-x-2">
+              <Input
+                type="date"
+                value={(value?.start || "")}
+                onChange={(e) => onChange({ ...value, start: e.target.value })}
+                style={element.fieldStyles}
+              />
+              <Input
+                type="date"
+                value={(value?.end || "")}
+                onChange={(e) => onChange({ ...value, end: e.target.value })}
+                style={element.fieldStyles}
+              />
+            </div>
+          );
+        }
+        return (
+          <Input
+            type="date"
+            id={element.id}
+            value={value || ""}
+            onChange={handleChange}
+            style={element.fieldStyles}
+          />
+        );
+
+      case "slider":
+      case "range-slider":
+      case "vertical-slider":
+        const isRange = element.type === "range-slider";
+        const isVertical = element.type === "vertical-slider";
+        const min = element.min || 0;
+        const max = element.max || 100;
+        const step = element.step || 1;
+
+        return (
+          <div className={cn(
+            "relative",
+            isVertical ? "h-[200px] py-4" : "py-6"
+          )}>
+            <Slider
+              defaultValue={isRange ? [min, max] : [min]}
+              value={
+                isRange 
+                  ? [value?.min ?? min, value?.max ?? max]
+                  : [value ?? min]
+              }
+              min={min}
+              max={max}
+              step={step}
+              onValueChange={isRange 
+                ? (vals) => onChange({ min: vals[0], max: vals[1] })
+                : (vals) => onChange(vals[0])
+              }
+              orientation={isVertical ? "vertical" : "horizontal"}
+              className={cn(
+                isVertical && "h-full",
+                !isVertical && "w-full"
+              )}
+            />
+            <div className={cn(
+              "flex text-xs text-muted-foreground",
+              isVertical ? "flex-col h-full justify-between items-start absolute -right-6 top-0" : "justify-between mt-2"
+            )}>
+              <span>{min}</span>
+              <span>{max}</span>
+            </div>
+          </div>
+        );
+
+      case "rating":
+        const maxRating = element.maxRating || 5;
+        return (
+          <div className="flex items-center space-x-1">
+            {Array.from({ length: maxRating }, (_, i) => i + 1).map((rating) => (
+              <button
+                key={rating}
+                type="button"
+                className={cn(
+                  "rounded-md p-1 transition-colors hover:bg-accent",
+                  value >= rating ? "text-yellow-400" : "text-muted hover:text-yellow-400"
+                )}
+                onClick={() => onChange(rating)}
+              >
+                <Star className={cn(
+                  "h-6 w-6",
+                  value >= rating && "fill-current"
+                )} />
+              </button>
+            ))}
+          </div>
+        );
+
+      case "toggle":
+        return (
+          <div className="flex items-center space-x-2">
+            <Switch
+              id={element.id}
+              checked={value || false}
+              onCheckedChange={onChange}
+            />
+            <Label htmlFor={element.id}>{element.placeholder || element.label}</Label>
+          </div>
+        );
+
+      case "file-upload":
+      case "multi-file-upload":
+      case "image-upload":
+      case "multi-image-upload":
+      case "gallery":
+        const isImage = element.type.includes("image");
+        const isMulti = element.type.includes("multi");
+        const isGallery = element.type === "gallery";
+        const acceptTypes = isImage ? "image/*" : ".pdf,.doc,.docx,.txt";
+
+        const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+          const files = Array.from(e.target.files || []);
+          if (files.length === 0) return;
+
+          if (isMulti) {
+            onChange(files);
+          } else {
+            onChange(files[0]);
+          }
+        };
+
+        const removeFile = (index: number) => {
+          if (isMulti && Array.isArray(value)) {
+            const newFiles = value.filter((_, i) => i !== index);
+            onChange(newFiles);
+          } else {
+            onChange(null);
+          }
+        };
+
+        const renderPreview = () => {
+          if (!value) return null;
+
+          if (isMulti && Array.isArray(value)) {
+            return (
+              <div className={isGallery ? "grid grid-cols-3 gap-4" : "space-y-2"}>
+                {value.map((file: File, index: number) => (
+                  <div key={index} className="relative group">
+                    {isImage ? (
+                      <div className="relative aspect-square">
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt={`Preview ${index + 1}`}
+                          className="absolute inset-0 w-full h-full object-cover rounded-lg"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/50 rounded-lg transition-opacity">
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => removeFile(index)}
+                          >
+                            <Minus className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between p-2 border rounded-lg bg-background">
+                        <span className="truncate flex-1">{file.name}</span>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => removeFile(index)}
+                        >
+                          <Minus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            );
+          } else if (!isMulti && value instanceof File) {
+            return (
+              <div className="relative group">
+                {isImage ? (
+                  <div className="relative aspect-square">
+                    <img
+                      src={URL.createObjectURL(value)}
+                      alt="Preview"
+                      className="absolute inset-0 w-full h-full object-cover rounded-lg"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/50 rounded-lg transition-opacity">
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => removeFile(0)}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between p-2 border rounded-lg bg-background">
+                    <span className="truncate flex-1">{value.name}</span>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => removeFile(0)}
+                    >
+                      <Minus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            );
+          }
+          return null;
+        };
+
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center justify-center w-full">
+              <label
+                htmlFor={element.id}
+                className={cn(
+                  "flex flex-col items-center justify-center w-full border-2 border-dashed rounded-lg cursor-pointer hover:bg-accent/50 transition-colors",
+                  value ? "h-24" : "h-64"
+                )}
+              >
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  {isImage ? (
+                    <ImageIcon className="w-8 h-8 mb-4 text-muted-foreground" />
+                  ) : (
+                    <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
+                  )}
+                  <p className="mb-2 text-sm text-muted-foreground">
+                    <span className="font-semibold">Click to upload</span> or drag and drop
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {isImage ? "PNG, JPG, GIF up to 10MB" : "PDF, DOC, TXT up to 10MB"}
+                  </p>
+                </div>
+                <Input
+                  id={element.id}
+                  type="file"
+                  className="hidden"
+                  accept={acceptTypes}
+                  multiple={isMulti}
+                  onChange={handleFileChange}
+                  required={element.required}
+                />
+              </label>
+            </div>
+            {renderPreview()}
+          </div>
+        );
+
+      case "address":
+        return (
+          <div className="space-y-4">
+            <Input
+              type="text"
+              placeholder="Street Address"
+              value={value?.street || ""}
+              onChange={(e) => onChange({ ...value, street: e.target.value })}
+              style={element.fieldStyles}
+            />
+            <Input
+              type="text"
+              placeholder="Apt, Suite, etc. (optional)"
+              value={value?.street2 || ""}
+              onChange={(e) => onChange({ ...value, street2: e.target.value })}
+              style={element.fieldStyles}
+            />
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                type="text"
+                placeholder="City"
+                value={value?.city || ""}
+                onChange={(e) => onChange({ ...value, city: e.target.value })}
+                style={element.fieldStyles}
+              />
+              <Input
+                type="text"
+                placeholder="State/Province"
+                value={value?.state || ""}
+                onChange={(e) => onChange({ ...value, state: e.target.value })}
+                style={element.fieldStyles}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                type="text"
+                placeholder="ZIP/Postal Code"
+                value={value?.zip || ""}
+                onChange={(e) => onChange({ ...value, zip: e.target.value })}
+                style={element.fieldStyles}
+              />
+              <Select
+                value={value?.country || ""}
+                onValueChange={(val) => onChange({ ...value, country: val })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Country" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="us">United States</SelectItem>
+                  <SelectItem value="ca">Canada</SelectItem>
+                  <SelectItem value="uk">United Kingdom</SelectItem>
+                  {/* Add more countries as needed */}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        );
+
+      case "name":
+        return (
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              type="text"
+              placeholder="First Name"
+              value={value?.first || ""}
+              onChange={(e) => onChange({ ...value, first: e.target.value })}
+              style={element.fieldStyles}
+            />
+            <Input
+              type="text"
+              placeholder="Last Name"
+              value={value?.last || ""}
+              onChange={(e) => onChange({ ...value, last: e.target.value })}
+              style={element.fieldStyles}
+            />
+          </div>
+        );
+
+      case "appointment":
+        return (
+          <div className="space-y-4">
+            <Input
+              type="date"
+              value={value?.date || ""}
+              onChange={(e) => onChange({ ...value, date: e.target.value })}
+              style={element.fieldStyles}
+            />
+            <Select
+              value={value?.time || ""}
+              onValueChange={(val) => onChange({ ...value, time: val })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select Time" />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: 24 }, (_, i) => {
+                  const hour = i.toString().padStart(2, "0");
+                  return (
+                    <SelectItem key={hour} value={`${hour}:00`}>
+                      {`${hour}:00`}
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+          </div>
+        );
+
+      case "captcha":
+        return (
+          <div className="border border-gray-300 rounded-md p-3 bg-gray-50">
+            <div className="flex items-center justify-between">
+              <div className="bg-gray-200 h-12 w-32 flex items-center justify-center text-gray-500">
+                CAPTCHA
+              </div>
+              <Button size="sm" variant="outline">
+                Refresh
+              </Button>
+            </div>
+            <Input
+              type="text"
+              id={element.id}
+              value={value || ""}
+              onChange={handleChange}
+              className="mt-2"
+              placeholder="Enter the code above"
+              required={element.required}
+              style={element.fieldStyles}
+            />
+          </div>
+        );
+
+      case "h1":
+        return <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">{element.label}</h1>;
+      case "h2":
+        return <h2 className="scroll-m-20 text-3xl font-semibold tracking-tight">{element.label}</h2>;
+      case "h3":
+        return <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">{element.label}</h3>;
+      case "h4":
+        return <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">{element.label}</h4>;
+      case "paragraph":
+        return <p className="leading-7 [&:not(:first-child)]:mt-6">{element.label}</p>;
+      case "quote":
+        return <blockquote className="mt-6 border-l-2 pl-6 italic">{element.label}</blockquote>;
+      case "divider":
+        return <hr className="my-4 border-t" />;
+      case "link":
+        return (
+          <a
+            href={element.url || "#"}
+            className="text-primary hover:underline"
+            target={element.newTab ? "_blank" : undefined}
+            rel="noopener noreferrer"
+          >
+            {element.label}
+          </a>
+        );
+      case "image":
+        return (
+          <img
+            src={element.url}
+            alt={element.label}
+            className="rounded-lg"
+            style={element.fieldStyles}
+          />
+        );
+      case "static-html":
+        return <div dangerouslySetInnerHTML={{ __html: element.content || "" }} />;
+
+      case "matrix":
+      case "matrix-table":
+      case "matrix-rating":
+        const rows = element.rows || ["Row 1", "Row 2", "Row 3"];
+        const cols = element.columns || ["Column 1", "Column 2", "Column 3"];
+        const isRating = element.type === "matrix-rating";
+        const isTable = element.type === "matrix-table";
+
+        return (
+          <div className="overflow-x-auto border rounded-lg">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-muted">
+                  <th className="p-3 border-b"></th>
+                  {cols.map((col, i) => (
+                    <th key={i} className="p-3 border-b text-center font-medium">
+                      {col}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row, i) => (
+                  <tr key={i} className={i % 2 === 0 ? "bg-background" : "bg-muted/30"}>
+                    <td className="p-3 border-b font-medium">{row}</td>
+                    {cols.map((col, j) => (
+                      <td key={j} className="p-3 border-b text-center">
+                        {isRating ? (
+                          <div className="flex justify-center space-x-1">
+                            {[1, 2, 3, 4, 5].map((rating) => (
+                              <button
+                                key={rating}
+                                type="button"
+                                className={`text-${
+                                  (value?.[i]?.[j] || 0) >= rating ? "yellow" : "gray"
+                                }-400 hover:text-yellow-400 focus:outline-none transition-colors`}
+                                onClick={() => {
+                                  const newValue = { ...(value || {}) };
+                                  if (!newValue[i]) newValue[i] = {};
+                                  newValue[i][j] = rating;
+                                  onChange(newValue);
+                                }}
+                              >
+                                <Star className={`h-4 w-4 ${(value?.[i]?.[j] || 0) >= rating ? "fill-current" : ""}`} />
+                              </button>
+                            ))}
+                          </div>
+                        ) : isTable ? (
+                          <Input
+                            type="text"
+                            value={value?.[i]?.[j] || ""}
+                            onChange={(e) => {
+                              const newValue = { ...(value || {}) };
+                              if (!newValue[i]) newValue[i] = {};
+                              newValue[i][j] = e.target.value;
+                              onChange(newValue);
+                            }}
+                            className="w-full h-8 min-h-8"
+                          />
+                        ) : (
+                          <RadioGroup
+                            value={value?.[i]?.[j] || ""}
+                            onValueChange={(val) => {
+                              const newValue = { ...(value || {}) };
+                              if (!newValue[i]) newValue[i] = {};
+                              newValue[i][j] = val;
+                              onChange(newValue);
+                            }}
+                          >
+                            <div className="flex justify-center">
+                              <RadioGroupItem value={col} id={`${element.id}-${i}-${j}`} />
+                            </div>
+                          </RadioGroup>
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+
+      case "tabs":
+        const tabsValue = activeTab.toString();
+        return (
+          <Tabs value={tabsValue} onValueChange={(val) => setActiveTab(parseInt(val))} className="w-full">
+            <TabsList className="w-full grid" style={{ 
+              gridTemplateColumns: `repeat(${element.tabs?.length || 1}, 1fr)`,
+              marginBottom: "1rem"
+            }}>
+              {element.tabs?.map((tab, index) => (
+                <TabsTrigger 
+                  key={index} 
+                  value={index.toString()}
+                  className="w-full"
+                >
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+            {element.tabs?.map((tab, index) => (
+              <TabsContent key={index} value={index.toString()}>
+                <Card className="p-6">
+                  <div className="space-y-4">
+                    {tab.elements?.map((childElement) => (
+                      <FormElementRenderer
+                        key={childElement.id}
+                        element={childElement}
+                        value={value?.[childElement.id]}
+                        onChange={(val) => {
+                          const newValue = { ...(value || {}) };
+                          newValue[childElement.id] = val;
+                          onChange(newValue);
+                        }}
+                        error={error?.[childElement.id]}
+                      />
+                    ))}
+                  </div>
+                </Card>
+              </TabsContent>
+            ))}
+          </Tabs>
+        );
+
+      case "steps":
+        return (
+          <div className="space-y-6">
+            <div className="relative">
+              <div className="absolute left-0 top-1/2 h-0.5 w-full bg-muted transform -translate-y-1/2" />
+              <div className="relative flex justify-between">
+                {element.steps?.map((step, index) => (
+                  <div
+                    key={index}
+                    className={cn(
+                      "flex items-center justify-center w-10 h-10 rounded-full border-2 bg-background transition-colors relative",
+                      index <= activeStep 
+                        ? "border-primary text-primary" 
+                        : "border-muted text-muted-foreground"
+                    )}
+                    role="button"
+                    onClick={() => setActiveStep(index)}
+                  >
+                    <span className="absolute -bottom-6 text-sm whitespace-nowrap">
+                      {step.label}
+                    </span>
+                    {index + 1}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <Card className="p-6">
+              <div className="space-y-4">
+                {element.steps?.[activeStep]?.elements?.map((childElement) => (
+                  <FormElementRenderer
+                    key={childElement.id}
+                    element={childElement}
+                    value={value?.[childElement.id]}
+                    onChange={(val) => {
+                      const newValue = { ...(value || {}) };
+                      newValue[childElement.id] = val;
+                      onChange(newValue);
+                    }}
+                    error={error?.[childElement.id]}
+                  />
+                ))}
+              </div>
+            </Card>
+
+            <div className="flex justify-between mt-6">
+              <Button
+                variant="outline"
+                onClick={() => setActiveStep(Math.max(0, activeStep - 1))}
+                disabled={activeStep === 0}
+              >
+                Previous
+              </Button>
+              {activeStep === (element.steps?.length || 1) - 1 ? (
+                <Button
+                  type="submit"
+                  onClick={() => onChange(value)}
+                >
+                  Submit
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => setActiveStep(Math.min((element.steps?.length || 1) - 1, activeStep + 1))}
+                >
+                  Next
+                </Button>
+              )}
+            </div>
+          </div>
+        );
+
+      case "grid":
+        return (
+          <div 
+            className="grid gap-4" 
+            style={{ 
+              gridTemplateColumns: `repeat(${element.columns || 2}, 1fr)`,
+              gridTemplateRows: `repeat(${element.rows || 2}, 1fr)`
+            }}
+          >
+            {element.elements?.map((childElement) => (
+              <FormElementRenderer
+                key={childElement.id}
+                element={childElement}
+                value={value?.[childElement.id]}
+                onChange={(val) => {
+                  const newValue = { ...(value || {}) };
+                  newValue[childElement.id] = val;
+                  onChange(newValue);
+                }}
+              />
+            ))}
+          </div>
+        );
+
+      case "table":
+        return (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  {element.headers?.map((header, i) => (
+                    <th key={i} className="p-2 border">{header}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {element.rows?.map((row, i) => (
+                  <tr key={i}>
+                    {row.map((cell, j) => (
+                      <td key={j} className="p-2 border">
+                        {typeof cell === "object" ? (
+                          <FormElementRenderer
+                            element={cell}
+                            value={value?.[i]?.[j]}
+                            onChange={(val) => {
+                              const newValue = { ...(value || {}) };
+                              if (!newValue[i]) newValue[i] = {};
+                              newValue[i][j] = val;
+                              onChange(newValue);
+                            }}
+                          />
+                        ) : (
+                          cell
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+
+      case "container":
+        return (
+          <div className="p-4 border rounded-lg" style={element.containerStyles}>
+            {element.elements?.map((childElement) => (
+              <FormElementRenderer
+                key={childElement.id}
+                element={childElement}
+                value={value?.[childElement.id]}
+                onChange={(val) => {
+                  const newValue = { ...(value || {}) };
+                  newValue[childElement.id] = val;
+                  onChange(newValue);
+                }}
+              />
+            ))}
+          </div>
+        );
+
+      case "2-columns":
+      case "3-columns":
+      case "4-columns":
+        const columns = element.type === "2-columns" ? 2 : element.type === "3-columns" ? 3 : 4;
+        return (
+          <div className={`grid grid-cols-${columns} gap-4`}>
+            {element.elements?.map((childElement) => (
+              <FormElementRenderer
+                key={childElement.id}
+                element={childElement}
+                value={value?.[childElement.id]}
+                onChange={(val) => {
+                  const newValue = { ...(value || {}) };
+                  newValue[childElement.id] = val;
+                  onChange(newValue);
+                }}
+              />
+            ))}
+          </div>
+        );
+
+      case "list":
+      case "nested-list":
+        const items = value || [{}];
+        return (
+          <div className="space-y-4">
+            {items.map((item: any, index: number) => (
+              <div key={index} className="relative border rounded-lg p-4">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="absolute right-2 top-2"
+                  onClick={() => {
+                    const newItems = items.filter((_: any, i: number) => i !== index);
+                    onChange(newItems);
+                  }}
+                >
+                  <Minus className="h-4 w-4" />
+                </Button>
+                {element.type === "nested-list" ? (
+                  element.elements?.map((childElement) => (
+                    <FormElementRenderer
+                      key={childElement.id}
+                      element={childElement}
+                      value={item[childElement.id]}
+                      onChange={(val) => {
+                        const newItems = [...items];
+                        newItems[index] = { ...newItems[index], [childElement.id]: val };
+                        onChange(newItems);
+                      }}
+                    />
+                  ))
+                ) : (
+                  <FormElementRenderer
+                    element={element.element!}
+                    value={item}
+                    onChange={(val) => {
+                      const newItems = [...items];
+                      newItems[index] = val;
+                      onChange(newItems);
+                    }}
+                  />
+                )}
+              </div>
+            ))}
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => onChange([...items, {}])}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Item
+            </Button>
+          </div>
+        );
+
+      case "hidden-input":
+        return (
+          <Input
+            type="hidden"
+            id={element.id}
+            value={value || ""}
+            onChange={handleChange}
+          />
+        );
+
+      case "danger-button":
+        return (
+          <Button 
+            variant="destructive" 
+            onClick={element.onClick}
+            className="w-full"
+          >
+            {element.label}
+          </Button>
+        );
+
+      case "form_submit":
+        return (
+          <Button 
+            type="submit" 
+            className="w-full"
+            style={{
+              backgroundColor: element.fieldStyles?.backgroundColor,
+              color: element.fieldStyles?.color,
+            }}
+          >
+            {element.label || "Submit"}
+            <Send className="ml-2 h-4 w-4" />
+          </Button>
+        );
+
+      default:
+        return null;
+    }
+  };
   // Group elements by row layout
   const groupElementsByLayout = (elements: FormElement[]) => {
     const result: { row: string | null, elements: FormElement[] }[] = [];
