@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
-import { Sidebar, SidebarContent, SidebarProvider } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { 
   PlusCircle, 
@@ -10,7 +9,14 @@ import {
   Settings, 
   Trash2, 
   Edit3,
-  Copy
+  Copy,
+  Search,
+  Filter,
+  ChevronDown,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  Eye
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { FormConfig } from '@/components/FormBuilder/types';
@@ -25,6 +31,23 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
+import { motion } from 'framer-motion';
 
 interface FormData {
   id: string;
@@ -40,11 +63,14 @@ const Dashboard = () => {
   const [stats, setStats] = useState({
     totalForms: 0,
     totalSubmissions: 0,
-    activeUsers: 0
+    activeUsers: 0,
+    completionRate: 0
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
   const [newFormName, setNewFormName] = useState('');
+  const [sortBy, setSortBy] = useState<'name' | 'date' | 'submissions'>('date');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'archived'>('all');
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -206,142 +232,332 @@ const Dashboard = () => {
     return dateValue.toLocaleDateString();
   };
 
-  const filteredForms = forms.filter(form => 
-    form.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const sortForms = (formsToSort: FormData[]) => {
+    switch (sortBy) {
+      case 'name':
+        return [...formsToSort].sort((a, b) => a.name.localeCompare(b.name));
+      case 'date':
+        return [...formsToSort].sort((a, b) => 
+          new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime()
+        );
+      case 'submissions':
+        return [...formsToSort].sort((a, b) => b.submissions - a.submissions);
+      default:
+        return formsToSort;
+    }
+  };
+
+  const getStatusColor = (submissions: number) => {
+    if (submissions > 50) return "text-green-500";
+    if (submissions > 20) return "text-yellow-500";
+    return "text-gray-500";
+  };
+
+  const filteredAndSortedForms = sortForms(
+    forms.filter(form => 
+      form.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
   );
 
   return (
-    <SidebarProvider>
-      <div className="flex h-screen bg-background">
-        {/* Sidebar */}
-        <Sidebar defaultWidth={250} variant="sidebar">
-          <SidebarContent>
-            <div className="flex flex-col gap-4 p-4">
-              <Button variant="ghost" className="justify-start gap-2">
-                <BarChart2 className="h-5 w-5" />
-                Overview
-              </Button>
-              <Button variant="ghost" className="justify-start gap-2">
-                <FileText className="h-5 w-5" />
-                Forms
-              </Button>
-              <Button variant="ghost" className="justify-start gap-2">
-                <Users className="h-5 w-5" />
-                Submissions
-              </Button>
-              <Button variant="ghost" className="justify-start gap-2">
-                <Settings className="h-5 w-5" />
-                Settings
-              </Button>
-            </div>
-          </SidebarContent>
-        </Sidebar>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-10 text-center"
+        >
+          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600 inline-block mb-2">
+            Nifty Form Bazaar
+          </h1>
+          <p className="text-gray-400 max-w-2xl mx-auto">
+            Create, manage, and analyze your forms in one beautiful dashboard
+          </p>
+        </motion.div>
 
-        {/* Main Content */}
-        <div className="flex-1 p-6 overflow-auto">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold">Dashboard</h1>
-            <Dialog open={isCreateFormOpen} onOpenChange={setIsCreateFormOpen}>
-              <DialogTrigger asChild>
-                <Button className="gap-2">
-                  <PlusCircle className="h-5 w-5" />
-                  Create Form
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Create New Form</DialogTitle>
-                  <DialogDescription>
-                    Give your form a name to get started
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Form Name</Label>
-                    <Input
-                      id="name"
-                      placeholder="Enter form name"
-                      value={newFormName}
-                      onChange={(e) => setNewFormName(e.target.value)}
-                    />
-                  </div>
-                  <Button onClick={handleCreateForm} className="w-full">
-                    Create Form
-                  </Button>
+        {/* Stats Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10"
+        >
+          <motion.div whileHover={{ scale: 1.03 }} transition={{ type: "spring", stiffness: 300 }}>
+            <Card className="p-6 bg-gradient-to-br from-gray-800 to-gray-850 border-gray-700 shadow-lg backdrop-blur-sm rounded-xl overflow-hidden relative">
+              <div className="absolute inset-0 bg-blue-500 opacity-5 rounded-xl"></div>
+              <div className="flex items-center gap-4 relative z-10">
+                <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-md">
+                  <FileText className="h-6 w-6 text-white" />
                 </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <Card className="p-6">
-              <h3 className="text-sm font-medium text-muted-foreground">Total Forms</h3>
-              <p className="text-3xl font-bold">{stats.totalForms}</p>
+                <div>
+                  <p className="text-sm text-gray-400 font-medium">Total Forms</p>
+                  <h3 className="text-2xl font-bold text-white">{stats.totalForms}</h3>
+                </div>
+              </div>
             </Card>
-            <Card className="p-6">
-              <h3 className="text-sm font-medium text-muted-foreground">Total Submissions</h3>
-              <p className="text-3xl font-bold">{stats.totalSubmissions}</p>
+          </motion.div>
+          
+          <motion.div whileHover={{ scale: 1.03 }} transition={{ type: "spring", stiffness: 300 }}>
+            <Card className="p-6 bg-gradient-to-br from-gray-800 to-gray-850 border-gray-700 shadow-lg backdrop-blur-sm rounded-xl overflow-hidden relative">
+              <div className="absolute inset-0 bg-green-500 opacity-5 rounded-xl"></div>
+              <div className="flex items-center gap-4 relative z-10">
+                <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-md">
+                  <CheckCircle2 className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400 font-medium">Submissions</p>
+                  <h3 className="text-2xl font-bold text-white">{stats.totalSubmissions}</h3>
+                </div>
+              </div>
             </Card>
-            <Card className="p-6">
-              <h3 className="text-sm font-medium text-muted-foreground">Active Users</h3>
-              <p className="text-3xl font-bold">{stats.activeUsers}</p>
+          </motion.div>
+          
+          <motion.div whileHover={{ scale: 1.03 }} transition={{ type: "spring", stiffness: 300 }}>
+            <Card className="p-6 bg-gradient-to-br from-gray-800 to-gray-850 border-gray-700 shadow-lg backdrop-blur-sm rounded-xl overflow-hidden relative">
+              <div className="absolute inset-0 bg-purple-500 opacity-5 rounded-xl"></div>
+              <div className="flex items-center gap-4 relative z-10">
+                <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-md">
+                  <Users className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400 font-medium">Active Users</p>
+                  <h3 className="text-2xl font-bold text-white">{stats.activeUsers}</h3>
+                </div>
+              </div>
             </Card>
-          </div>
-
-          {/* Recent Forms */}
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">Your Forms</h2>
-              <Input
-                placeholder="Search forms..."
-                className="max-w-xs"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredForms.map((form) => (
-                <Card key={form.id} className="p-4 hover:shadow-lg transition-shadow">
-                  <h3 className="font-medium mb-2">{form.name}</h3>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Last modified {formatDate(form.lastModified)}
-                  </p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">
-                      {form.submissions} submissions
-                    </span>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDuplicateForm(form)}
-                      >
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => navigate(`/form-builder/${form.id}`)}
-                      >
-                        <Edit3 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteForm(form.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+          </motion.div>
+          
+          <motion.div whileHover={{ scale: 1.03 }} transition={{ type: "spring", stiffness: 300 }}>
+            <Card className="p-6 bg-gradient-to-br from-gray-800 to-gray-850 border-gray-700 shadow-lg backdrop-blur-sm rounded-xl overflow-hidden relative">
+              <div className="absolute inset-0 bg-orange-500 opacity-5 rounded-xl"></div>
+              <div className="flex items-center gap-4 relative z-10">
+                <div className="p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg shadow-md">
+                  <BarChart2 className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400 font-medium">Completion Rate</p>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-2xl font-bold text-white">{stats.completionRate}%</h3>
+                    <div className="w-24 h-2 bg-gray-700 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full"
+                        style={{ width: `${stats.completionRate}%` }}
+                      ></div>
                     </div>
                   </div>
-                </Card>
-              ))}
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+        </motion.div>
+
+        {/* Actions Bar */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="bg-gray-800/50 backdrop-blur-sm p-5 rounded-xl mb-8 border border-gray-700/50 shadow-lg"
+        >
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="flex items-center gap-4 w-full md:w-auto">
+              <Dialog open={isCreateFormOpen} onOpenChange={setIsCreateFormOpen}>
+                <DialogTrigger asChild>
+                  <motion.button 
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow-md"
+                  >
+                    <PlusCircle className="h-4 w-4" />
+                    Create Form
+                  </motion.button>
+                </DialogTrigger>
+                <DialogContent className="bg-gray-800 border-gray-700 rounded-xl shadow-xl backdrop-blur-sm">
+                  <DialogHeader>
+                    <DialogTitle className="text-white text-xl">Create New Form</DialogTitle>
+                    <DialogDescription className="text-gray-400">
+                      Give your form a name to get started
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label className="text-white">Form Name</Label>
+                      <Input
+                        id="name"
+                        placeholder="Enter form name..."
+                        value={newFormName}
+                        onChange={(e) => setNewFormName(e.target.value)}
+                        className="bg-gray-700 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500 transition-all"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-end">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleCreateForm}
+                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-4 py-2 rounded-lg shadow-md"
+                    >
+                      Create Form
+                    </motion.button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              <div className="flex items-center gap-2 w-full md:w-auto">
+                <div className="relative w-full md:w-64">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search forms..."
+                    className="pl-10 bg-gray-700/70 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500 rounded-lg transition-all"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 w-full md:w-auto">
+              <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
+                <SelectTrigger className="w-40 bg-gray-700/70 border-gray-600 text-white rounded-lg">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-800 border-gray-700 rounded-lg shadow-xl">
+                  <SelectItem value="name" className="text-white hover:bg-gray-700">Name</SelectItem>
+                  <SelectItem value="date" className="text-white hover:bg-gray-700">Last Modified</SelectItem>
+                  <SelectItem value="submissions" className="text-white hover:bg-gray-700">Submissions</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={filterStatus} onValueChange={(value: any) => setFilterStatus(value)}>
+                <SelectTrigger className="w-40 bg-gray-700/70 border-gray-600 text-white rounded-lg">
+                  <SelectValue placeholder="Filter by" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-800 border-gray-700 rounded-lg shadow-xl">
+                  <SelectItem value="all" className="text-white hover:bg-gray-700">All Forms</SelectItem>
+                  <SelectItem value="active" className="text-white hover:bg-gray-700">Active</SelectItem>
+                  <SelectItem value="archived" className="text-white hover:bg-gray-700">Archived</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
-        </div>
+        </motion.div>
+
+        {/* Forms Grid */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
+          {filteredAndSortedForms.map((form, index) => (
+            <motion.div
+              key={form.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 * index }}
+              whileHover={{ y: -5 }}
+            >
+              <Card className="bg-gradient-to-br from-gray-800 to-gray-850 border-gray-700 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300">
+                <div className="p-6 relative">
+                  <div className="absolute top-0 right-0 h-1 w-full bg-gradient-to-r from-blue-500 to-purple-600"></div>
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className="text-lg font-semibold text-white truncate">{form.name}</h3>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg">
+                          <ChevronDown className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700 rounded-lg shadow-xl">
+                        <DropdownMenuItem 
+                          onClick={() => navigate(`/form-builder/${form.id}`)}
+                          className="text-white hover:bg-gray-700 focus:bg-gray-700"
+                        >
+                          <Edit3 className="h-4 w-4 mr-2 text-blue-400" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleDuplicateForm(form)}
+                          className="text-white hover:bg-gray-700 focus:bg-gray-700"
+                        >
+                          <Copy className="h-4 w-4 mr-2 text-purple-400" />
+                          Duplicate
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator className="bg-gray-700" />
+                        <DropdownMenuItem 
+                          onClick={() => handleDeleteForm(form.id)} 
+                          className="text-red-400 hover:text-red-300 hover:bg-gray-700 focus:bg-gray-700"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 text-sm text-gray-400">
+                      <Clock className="h-4 w-4 text-gray-500" />
+                      Last modified {formatDate(form.lastModified)}
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs ${getStatusColor(form.submissions)}`}>
+                          <CheckCircle2 className="h-3 w-3" />
+                          <span>{form.submissions} submissions</span>
+                        </div>
+                      </div>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => navigate(`/form-builder/${form.id}`)}
+                        className="bg-gray-700 hover:bg-gray-600 border border-gray-600 text-white px-3 py-1 rounded-lg flex items-center gap-1 text-sm transition-colors"
+                      >
+                        <Eye className="h-3 w-3 mr-1" />
+                        View
+                      </motion.button>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        {/* Empty State */}
+        {filteredAndSortedForms.length === 0 && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-center py-16 px-6 bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 shadow-lg"
+          >
+            <div className="relative mx-auto w-20 h-20 mb-6">
+              <div className="absolute inset-0 bg-blue-500/10 rounded-full animate-pulse"></div>
+              <div className="absolute inset-2 bg-gray-800 rounded-full flex items-center justify-center">
+                <FileText className="h-8 w-8 text-gray-500" />
+              </div>
+            </div>
+            <h3 className="text-xl font-medium text-white mb-2">No forms found</h3>
+            <p className="text-gray-400 mb-6 max-w-md mx-auto">
+              {searchTerm ? "Try adjusting your search terms or clear filters to see all forms" : "Get started by creating your first form and begin collecting submissions"}
+            </p>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setIsCreateFormOpen(true)}
+              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 mx-auto"
+            >
+              <PlusCircle className="h-4 w-4" />
+              Create Form
+            </motion.button>
+          </motion.div>
+        )}
       </div>
-    </SidebarProvider>
+    </div>
   );
 };
 
