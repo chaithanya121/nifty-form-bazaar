@@ -1,4 +1,3 @@
-
 import { FormCanvasProps, FormElement } from "./types";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -1370,24 +1369,25 @@ const FormCanvas = ({ elements, setFormConfig, onSelectElement, selectedElement,
         return null;
     }
   };
-  // Group elements by row layout
-  const groupElementsByLayout = (elements: FormElement[]) => {
+  const groupElementsByLayout = (elements: FormElement[] = []) => {
     const result: { row: string | null, elements: FormElement[] }[] = [];
     const rowGroups = new Map<string, FormElement[]>();
     const standaloneElements: FormElement[] = [];
     
     // First, collect elements by row ID
-    elements.forEach(element => {
-      if (element.layout?.inRow && element.layout.rowId) {
-        const rowId = element.layout.rowId;
-        if (!rowGroups.has(rowId)) {
-          rowGroups.set(rowId, []);
+    if (elements && Array.isArray(elements)) {
+      elements.forEach(element => {
+        if (element.layout?.inRow && element.layout.rowId) {
+          const rowId = element.layout.rowId;
+          if (!rowGroups.has(rowId)) {
+            rowGroups.set(rowId, []);
+          }
+          rowGroups.get(rowId)?.push(element);
+        } else {
+          standaloneElements.push(element);
         }
-        rowGroups.get(rowId)?.push(element);
-      } else {
-        standaloneElements.push(element);
-      }
-    });
+      });
+    }
     
     // Sort elements in each row by position
     rowGroups.forEach((rowElements, rowId) => {

@@ -16,7 +16,12 @@ import {
   Clock,
   CheckCircle2,
   XCircle,
-  Eye
+  Eye,
+  Layers,
+  Layout,
+  Code,
+  Palette,
+  Sliders
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { FormConfig } from '@/components/FormBuilder/types';
@@ -261,21 +266,75 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
+      {/* Header */}
+      <header className="border-b border-gray-800 bg-gray-900 sticky top-0 z-50 shadow-md">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-2">
+              <Layers className="h-6 w-6 text-blue-500" />
+              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">
+                Form Builder
+              </span>
+            </div>
+            
+            <div className="hidden md:flex items-center gap-6">
+              <button className="text-gray-300 hover:text-white">Templates</button>
+              <button className="text-gray-300 hover:text-white">Documentation</button>
+              <button className="text-gray-300 hover:text-white">Settings</button>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <button className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
+                <Settings className="h-4 w-4 text-gray-300" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mb-10 text-center"
-        >
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600 inline-block mb-2">
-            Nifty Form Bazaar
-          </h1>
-          <p className="text-gray-400 max-w-2xl mx-auto">
-            Create, manage, and analyze your forms in one beautiful dashboard
-          </p>
-        </motion.div>
+        {/* Dashboard Title */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-white mb-2">Dashboard</h1>
+          <p className="text-gray-400">Manage your forms and view statistics</p>
+        </div>
+
+        {/* Form Builder Quick Access */}
+        <div className="mb-10 bg-gray-800/50 backdrop-blur-sm p-5 rounded-xl border border-gray-700/50 shadow-lg">
+          <h2 className="text-lg font-medium text-white mb-4">Form Builder Tools</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <button 
+              onClick={() => setIsCreateFormOpen(true)}
+              className="bg-gradient-to-br from-gray-800 to-gray-850 hover:from-gray-750 hover:to-gray-800 border border-gray-700 rounded-lg p-4 flex flex-col items-center justify-center gap-2 transition-all duration-200 group"
+            >
+              <div className="p-3 bg-blue-500/10 rounded-full group-hover:bg-blue-500/20 transition-colors">
+                <PlusCircle className="h-6 w-6 text-blue-400" />
+              </div>
+              <span className="text-sm font-medium text-white">New Form</span>
+            </button>
+            
+            <button className="bg-gradient-to-br from-gray-800 to-gray-850 hover:from-gray-750 hover:to-gray-800 border border-gray-700 rounded-lg p-4 flex flex-col items-center justify-center gap-2 transition-all duration-200 group">
+              <div className="p-3 bg-purple-500/10 rounded-full group-hover:bg-purple-500/20 transition-colors">
+                <Layout className="h-6 w-6 text-purple-400" />
+              </div>
+              <span className="text-sm font-medium text-white">Templates</span>
+            </button>
+            
+            <button className="bg-gradient-to-br from-gray-800 to-gray-850 hover:from-gray-750 hover:to-gray-800 border border-gray-700 rounded-lg p-4 flex flex-col items-center justify-center gap-2 transition-all duration-200 group">
+              <div className="p-3 bg-green-500/10 rounded-full group-hover:bg-green-500/20 transition-colors">
+                <Sliders className="h-6 w-6 text-green-400" />
+              </div>
+              <span className="text-sm font-medium text-white">Form Settings</span>
+            </button>
+            
+            <button className="bg-gradient-to-br from-gray-800 to-gray-850 hover:from-gray-750 hover:to-gray-800 border border-gray-700 rounded-lg p-4 flex flex-col items-center justify-center gap-2 transition-all duration-200 group">
+              <div className="p-3 bg-orange-500/10 rounded-full group-hover:bg-orange-500/20 transition-colors">
+                <Palette className="h-6 w-6 text-orange-400" />
+              </div>
+              <span className="text-sm font-medium text-white">Themes</span>
+            </button>
+          </div>
+        </div>
 
         {/* Stats Section */}
         <motion.div 
@@ -444,88 +503,127 @@ const Dashboard = () => {
           </div>
         </motion.div>
 
+        {/* Recent Activity */}
+        <div className="mb-10 bg-gray-800/50 backdrop-blur-sm p-5 rounded-xl border border-gray-700/50 shadow-lg">
+          <h2 className="text-lg font-medium text-white mb-4">Recent Activity</h2>
+          <div className="space-y-4">
+            <div className="flex items-start gap-3 p-3 bg-gray-800/70 rounded-lg">
+              <div className="p-2 bg-blue-500/10 rounded-full">
+                <Edit3 className="h-4 w-4 text-blue-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-white">You edited <span className="font-medium">Contact Form</span></p>
+                <p className="text-xs text-gray-400">2 hours ago</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start gap-3 p-3 bg-gray-800/70 rounded-lg">
+              <div className="p-2 bg-green-500/10 rounded-full">
+                <PlusCircle className="h-4 w-4 text-green-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-white">You created <span className="font-medium">Feedback Survey</span></p>
+                <p className="text-xs text-gray-400">Yesterday</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start gap-3 p-3 bg-gray-800/70 rounded-lg">
+              <div className="p-2 bg-purple-500/10 rounded-full">
+                <CheckCircle2 className="h-4 w-4 text-purple-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-white">New submission on <span className="font-medium">Registration Form</span></p>
+                <p className="text-xs text-gray-400">2 days ago</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Forms Grid */}
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
-          {filteredAndSortedForms.map((form, index) => (
-            <motion.div
-              key={form.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 * index }}
-              whileHover={{ y: -5 }}
-            >
-              <Card className="bg-gradient-to-br from-gray-800 to-gray-850 border-gray-700 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="p-6 relative">
-                  <div className="absolute top-0 right-0 h-1 w-full bg-gradient-to-r from-blue-500 to-purple-600"></div>
-                  <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-lg font-semibold text-white truncate">{form.name}</h3>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg">
-                          <ChevronDown className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700 rounded-lg shadow-xl">
-                        <DropdownMenuItem 
-                          onClick={() => navigate(`/form-builder/${form.id}`)}
-                          className="text-white hover:bg-gray-700 focus:bg-gray-700"
-                        >
-                          <Edit3 className="h-4 w-4 mr-2 text-blue-400" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          onClick={() => handleDuplicateForm(form)}
-                          className="text-white hover:bg-gray-700 focus:bg-gray-700"
-                        >
-                          <Copy className="h-4 w-4 mr-2 text-purple-400" />
-                          Duplicate
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-gray-700" />
-                        <DropdownMenuItem 
-                          onClick={() => handleDeleteForm(form.id)} 
-                          className="text-red-400 hover:text-red-300 hover:bg-gray-700 focus:bg-gray-700"
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2 text-sm text-gray-400">
-                      <Clock className="h-4 w-4 text-gray-500" />
-                      Last modified {formatDate(form.lastModified)}
+        <div className="mb-6">
+          <h2 className="text-lg font-medium text-white mb-4">Your Forms</h2>
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {filteredAndSortedForms.map((form, index) => (
+              <motion.div
+                key={form.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 * index }}
+                whileHover={{ y: -5 }}
+              >
+                <Card className="bg-gradient-to-br from-gray-800 to-gray-850 border-gray-700 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300">
+                  <div className="p-6 relative">
+                    <div className="absolute top-0 right-0 h-1 w-full bg-gradient-to-r from-blue-500 to-purple-600"></div>
+                    <div className="flex justify-between items-start mb-4">
+                      <h3 className="text-lg font-semibold text-white truncate">{form.name}</h3>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg">
+                            <ChevronDown className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700 rounded-lg shadow-xl">
+                          <DropdownMenuItem 
+                            onClick={() => navigate(`/form-builder/${form.id}`)}
+                            className="text-white hover:bg-gray-700 focus:bg-gray-700"
+                          >
+                            <Edit3 className="h-4 w-4 mr-2 text-blue-400" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleDuplicateForm(form)}
+                            className="text-white hover:bg-gray-700 focus:bg-gray-700"
+                          >
+                            <Copy className="h-4 w-4 mr-2 text-purple-400" />
+                            Duplicate
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator className="bg-gray-700" />
+                          <DropdownMenuItem 
+                            onClick={() => handleDeleteForm(form.id)} 
+                            className="text-red-400 hover:text-red-300 hover:bg-gray-700 focus:bg-gray-700"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
 
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs ${getStatusColor(form.submissions)}`}>
-                          <CheckCircle2 className="h-3 w-3" />
-                          <span>{form.submissions} submissions</span>
-                        </div>
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 text-sm text-gray-400">
+                        <Clock className="h-4 w-4 text-gray-500" />
+                        Last modified {formatDate(form.lastModified)}
                       </div>
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => navigate(`/form-builder/${form.id}`)}
-                        className="bg-gray-700 hover:bg-gray-600 border border-gray-600 text-white px-3 py-1 rounded-lg flex items-center gap-1 text-sm transition-colors"
-                      >
-                        <Eye className="h-3 w-3 mr-1" />
-                        View
-                      </motion.button>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs ${getStatusColor(form.submissions)}`}>
+                            <CheckCircle2 className="h-3 w-3" />
+                            <span>{form.submissions} submissions</span>
+                          </div>
+                        </div>
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => navigate(`/form-builder/${form.id}`)}
+                          className="bg-gray-700 hover:bg-gray-600 border border-gray-600 text-white px-3 py-1 rounded-lg flex items-center gap-1 text-sm transition-colors"
+                        >
+                          <Eye className="h-3 w-3 mr-1" />
+                          View
+                        </motion.button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Card>
-            </motion.div>
-          ))}
-        </motion.div>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
 
         {/* Empty State */}
         {filteredAndSortedForms.length === 0 && (
@@ -557,6 +655,22 @@ const Dashboard = () => {
           </motion.div>
         )}
       </div>
+      
+      {/* Footer */}
+      <footer className="border-t border-gray-800 py-6 mt-12">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Layers className="h-5 w-5 text-blue-500" />
+              <span className="text-lg font-bold text-white">Form Builder</span>
+            </div>
+            
+            <div className="text-sm text-gray-500">
+              &copy; 2025 Form Builder
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

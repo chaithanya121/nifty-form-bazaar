@@ -6,7 +6,7 @@ import FormCanvas from "./FormCanvas";
 import FormPreview from "./FormPreview";
 import ElementSettings from "./ElementSettings";
 import { Button } from "@/components/ui/button";
-import { Eye, Code, Save } from "lucide-react";
+import { Eye, Code, Save, Layers, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -82,31 +82,21 @@ const FormBuilder = () => {
   const { id } = useParams();
   const formInitialized = useRef(false);
 
-  // Load form data if editing an existing form
   useEffect(() => {
     if (id && !formInitialized.current) {
-      // Set the initialization flag to prevent infinite loops
       formInitialized.current = true;
-      
       try {
-        // Get forms from localStorage
         const storedFormsJson = localStorage.getItem('nifty-forms');
         if (storedFormsJson) {
           const storedForms = JSON.parse(storedFormsJson);
-          
-          // Find the form with the matching ID
           const formToEdit = storedForms.find((form: any) => form.id === id);
-          
           if (formToEdit) {
-            // Set the form configuration
             setFormConfig(formToEdit.config);
-            
             toast({
               title: "Form Loaded",
               description: `Editing form: ${formToEdit.name}`,
             });
           } else {
-            // Form not found, show error and navigate back
             toast({
               title: "Error",
               description: "Form not found",
@@ -172,7 +162,6 @@ const FormBuilder = () => {
       ),
     }));
 
-    // Update the selectedElement state
     setSelectedElement(updatedElement);
   };
 
@@ -187,7 +176,6 @@ const FormBuilder = () => {
     }));
   };
 
-  // Fix the string handling for style properties that might be numbers
   const getStyleStringValue = (style: string | number | undefined): string => {
     if (style === undefined) return '';
     
@@ -213,48 +201,56 @@ const FormBuilder = () => {
   };
 
   const handleSaveForm = () => {
-    // If this is a new form being created, we would typically generate an ID
     const formId = id || `form-${Date.now()}`;
-    
-    // Get existing forms from localStorage or initialize an empty array
     const existingFormsJson = localStorage.getItem('nifty-forms');
     const existingForms = existingFormsJson ? JSON.parse(existingFormsJson) : [];
-    
-    // Check if the form already exists in localStorage
     const formIndex = existingForms.findIndex((form: any) => form.id === formId);
-    
-    // Create or update the form object
     const formObject = {
       id: formId,
       name: formConfig.name,
-      // Store dates as ISO strings for consistent serialization
       createdAt: formIndex >= 0 ? existingForms[formIndex].createdAt : new Date().toISOString(),
       lastModified: new Date().toISOString(),
       submissions: formIndex >= 0 ? existingForms[formIndex].submissions : 0,
       config: formConfig
     };
-    
-    // Update or add the form in the forms array
     if (formIndex >= 0) {
       existingForms[formIndex] = formObject;
     } else {
       existingForms.push(formObject);
     }
-    
-    // Save the updated forms array back to localStorage
     localStorage.setItem('nifty-forms', JSON.stringify(existingForms));
-    
     toast({
       title: "Form Saved",
       description: "Your form has been saved successfully",
     });
-    
-    // Navigate back to the dashboard
     navigate('/');
   };
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
+      {/* Header */}
+      <header className="border-b border-gray-800 bg-gray-900 sticky top-0 z-50 shadow-md">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={() => navigate('/')}
+                className="text-gray-300 hover:text-white flex items-center gap-1"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span>Back to Dashboard</span>
+              </button>
+              <div className="flex items-center gap-2">
+                <Layers className="h-6 w-6 text-blue-500" />
+                <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">
+                  Form Builder
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
       <div className="container mx-auto p-4">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">Create account</h1>
@@ -322,11 +318,9 @@ const FormBuilder = () => {
                       <TabsTrigger value="import">Import</TabsTrigger>
                     </TabsList>
 
-                    {/* Canvas Styling Tab */}
                     <TabsContent value="canvas-styling" className="space-y-4">
                       <h4 className="text-lg font-semibold text-white">Canvas Styling</h4>
 
-                      {/* Preset Styles Dropdown */}
                       <div className="space-y-2">
                         <Label className="text-white">Preset Styles</Label>
                         <Select onValueChange={(value) => applyPresetStyle(value)}>
@@ -343,7 +337,6 @@ const FormBuilder = () => {
                         </Select>
                       </div>
 
-                      {/* Custom Canvas Styling */}
                       <div className="space-y-4">
                         <div className="space-y-2">
                           <Label className="text-white">Background Color</Label>
@@ -396,7 +389,6 @@ const FormBuilder = () => {
                       </div>
                     </TabsContent>
 
-                    {/* Import Tab */}
                     <TabsContent value="import" className="space-y-4">
                       <h4 className="text-lg font-semibold text-white">Import</h4>
                       <div className="space-y-4">

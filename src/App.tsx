@@ -17,7 +17,7 @@ const App = () => {
       <BrowserRouter>
         <div className="relative">
           <TooltipProvider delayDuration={0}>
-            <Header />
+            {/* <Header /> */}
             <main>
               <Routes>
                 <Route path="/" element={<Dashboard />} />
