@@ -6,7 +6,7 @@ import FormCanvas from "./FormCanvas";
 import FormPreview from "./FormPreview";
 import ElementSettings from "./ElementSettings";
 import { Button } from "@/components/ui/button";
-import { Eye, Code, Save, Layers, ArrowLeft } from "lucide-react";
+import { Eye, Code, Save, Layers, ArrowLeft, Globe, Link } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -77,6 +77,7 @@ const FormBuilder = () => {
   const [formConfig, setFormConfig] = useState<FormConfig>(DEFAULT_CONFIG);
   const [previewMode, setPreviewMode] = useState(false);
   const [selectedElement, setSelectedElement] = useState<FormElement | undefined>();
+  const [isPublished, setIsPublished] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const { id } = useParams();
@@ -92,6 +93,7 @@ const FormBuilder = () => {
           const formToEdit = storedForms.find((form: any) => form.id === id);
           if (formToEdit) {
             setFormConfig(formToEdit.config);
+            setIsPublished(formToEdit.published || false);
             toast({
               title: "Form Loaded",
               description: `Editing form: ${formToEdit.name}`,
@@ -204,26 +206,81 @@ const FormBuilder = () => {
     const formId = id || `form-${Date.now()}`;
     const existingFormsJson = localStorage.getItem('nifty-forms');
     const existingForms = existingFormsJson ? JSON.parse(existingFormsJson) : [];
-    const formIndex = existingForms.findIndex((form: any) => form.id === formId);
-    const formObject = {
-      id: formId,
-      name: formConfig.name,
-      createdAt: formIndex >= 0 ? existingForms[formIndex].createdAt : new Date().toISOString(),
-      lastModified: new Date().toISOString(),
-      submissions: formIndex >= 0 ? existingForms[formIndex].submissions : 0,
-      config: formConfig
-    };
-    if (formIndex >= 0) {
-      existingForms[formIndex] = formObject;
-    } else {
+    const formIndex = existingForms.findIndex((form: any) => form.id === id);
+    
+    // If the form doesn't exist yet, create a new one
+    if (formIndex < 0) {
+      const formObject = {
+        id: formId,
+        name: formConfig.name,
+        createdAt: new Date().toISOString(),
+        lastModified: new Date().toISOString(),
+        submissions: 0,
+        published: isPublished,
+        config: formConfig
+      };
       existingForms.push(formObject);
+    } else {
+      // Update the existing form
+      existingForms[formIndex] = {
+        ...existingForms[formIndex],
+        lastModified: new Date().toISOString(),
+        config: formConfig
+      };
     }
+    
     localStorage.setItem('nifty-forms', JSON.stringify(existingForms));
     toast({
       title: "Form Saved",
       description: "Your form has been saved successfully",
     });
     navigate('/');
+  };
+
+  const handlePublishForm = () => {
+    const formId = id || `form-${Date.now()}`;
+    const existingFormsJson = localStorage.getItem('nifty-forms');
+    const existingForms = existingFormsJson ? JSON.parse(existingFormsJson) : [];
+    const formIndex = existingForms.findIndex((form: any) => form.id === id);
+    
+    // If the form doesn't exist yet, save it first
+    if (formIndex < 0) {
+      const formObject = {
+        id: formId,
+        name: formConfig.name,
+        createdAt: new Date().toISOString(),
+        lastModified: new Date().toISOString(),
+        submissions: 0,
+        published: true,
+        config: formConfig
+      };
+      existingForms.push(formObject);
+    } else {
+      // Update the existing form to be published
+      existingForms[formIndex] = {
+        ...existingForms[formIndex],
+        published: true,
+        lastModified: new Date().toISOString(),
+        config: formConfig
+      };
+    }
+    
+    localStorage.setItem('nifty-forms', JSON.stringify(existingForms));
+    setIsPublished(true);
+    toast({
+      title: "Form Published",
+      description: "Your form has been published and is now available for submissions",
+    });
+  };
+
+  const handleShareLink = () => {
+    const formId = id || `form-${Date.now()}`;
+    const shareableLink = `${window.location.origin}/form/${formId}`;
+    navigator.clipboard.writeText(shareableLink);
+    toast({
+      title: "Link Copied",
+      description: "Shareable form link copied to clipboard"
+    });
   };
 
   return (
@@ -271,6 +328,22 @@ const FormBuilder = () => {
               {previewMode ? <Code /> : <Eye />}
               {previewMode ? "Edit" : "Preview"}
             </Button>
+            <Button 
+              onClick={handlePublishForm} 
+              className="gap-2 bg-blue-600 text-white hover:bg-blue-700"
+            >
+              <Globe className="h-4 w-4" />
+              Publish
+            </Button>
+            {isPublished && (
+              <Button 
+                onClick={handleShareLink} 
+                className="gap-2 bg-purple-600 text-white hover:bg-purple-700"
+              >
+                <Link className="h-4 w-4" />
+                Share
+              </Button>
+            )}
             <Button 
               onClick={handleSaveForm} 
               className="gap-2 bg-green-600 text-white hover:bg-green-700"

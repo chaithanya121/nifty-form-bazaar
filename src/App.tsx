@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound";
 import Header from "./components/Header";
 import FormBuilder from "./components/FormBuilder";
 import Dashboard from "@/components/Dashboard";
+import FormSubmission from "@/components/FormSubmission";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => {
                 <Route path="/forms" element={<Index />} />
                 <Route path="/create" element={<FormBuilder />} />
                 <Route path="/form-builder/:id" element={<FormBuilder />} />
+                <Route path="/form/:id" element={<FormSubmission />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>

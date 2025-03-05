@@ -1,4 +1,3 @@
-
 import { FormConfig, FormElement } from "./types";
 import FormElementRenderer from "./FormElementRenderer";
 import { Button } from "@/components/ui/button";
@@ -9,18 +8,28 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 interface FormPreviewProps {
   formConfig: FormConfig;
+  values?: Record<string, any>;
+  onChange?: (values: Record<string, any>) => void;
+  onSubmit?: (values: Record<string, any>) => void;
+  isSubmission?: boolean;
 }
 
-const FormPreview = ({ formConfig }: FormPreviewProps) => {
-  const [formData, setFormData] = useState<Record<string, any>>({});
+const FormPreview = ({ formConfig, values, onChange, onSubmit, isSubmission = false }: FormPreviewProps) => {
+  const [formData, setFormData] = useState<Record<string, any>>(values || {});
   const [termsAccepted, setTermsAccepted] = useState(false);
   const { toast } = useToast();
 
   const handleChange = (elementId: string, value: any) => {
-    setFormData((prev) => ({
-      ...prev,
+    const updatedData = {
+      ...formData,
       [elementId]: value,
-    }));
+    };
+    
+    setFormData(updatedData);
+    
+    if (onChange) {
+      onChange(updatedData);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -35,12 +44,15 @@ const FormPreview = ({ formConfig }: FormPreviewProps) => {
       return;
     }
 
-    toast({
-      title: "Form Submitted",
-      description: "Your form has been submitted successfully.",
-    });
-
-    console.log("Form data:", formData);
+    if (onSubmit) {
+      onSubmit(formData);
+    } else {
+      toast({
+        title: "Form Submitted",
+        description: "Your form has been submitted successfully.",
+      });
+      console.log("Form data:", formData);
+    }
   };
 
   // Group elements by row layout for visual organization

@@ -21,7 +21,9 @@ import {
   Layout,
   Code,
   Palette,
-  Sliders
+  Sliders,
+  Globe,
+  Link
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { FormConfig } from '@/components/FormBuilder/types';
@@ -60,6 +62,7 @@ interface FormData {
   createdAt: string | Date;
   lastModified: string | Date;
   submissions: number;
+  published: boolean;
   config: FormConfig;
 }
 
@@ -75,7 +78,7 @@ const Dashboard = () => {
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
   const [newFormName, setNewFormName] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'date' | 'submissions'>('date');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'archived'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'archived' | 'published' | 'draft'>('all');
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -124,6 +127,7 @@ const Dashboard = () => {
       createdAt: new Date().toISOString(),
       lastModified: new Date().toISOString(),
       submissions: 0,
+      published: false,
       config: {
         name: newFormName,
         elements: [],
@@ -201,7 +205,8 @@ const Dashboard = () => {
       name: `${form.name} (Copy)`,
       createdAt: new Date().toISOString(),
       lastModified: new Date().toISOString(),
-      submissions: 0
+      submissions: 0,
+      published: false
     };
 
     // Update state
@@ -259,9 +264,20 @@ const Dashboard = () => {
   };
 
   const filteredAndSortedForms = sortForms(
-    forms.filter(form => 
-      form.name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    forms.filter(form => {
+      // Apply search filter
+      const matchesSearch = form.name.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      // Apply status filter
+      let matchesStatus = true;
+      if (filterStatus === 'published') {
+        matchesStatus = form.published === true;
+      } else if (filterStatus === 'draft') {
+        matchesStatus = form.published === false;
+      }
+      
+      return matchesSearch && matchesStatus;
+    })
   );
 
   return (
@@ -495,8 +511,8 @@ const Dashboard = () => {
                 </SelectTrigger>
                 <SelectContent className="bg-gray-800 border-gray-700 rounded-lg shadow-xl">
                   <SelectItem value="all" className="text-white hover:bg-gray-700">All Forms</SelectItem>
-                  <SelectItem value="active" className="text-white hover:bg-gray-700">Active</SelectItem>
-                  <SelectItem value="archived" className="text-white hover:bg-gray-700">Archived</SelectItem>
+                  <SelectItem value="published" className="text-white hover:bg-gray-700">Published</SelectItem>
+                  <SelectItem value="draft" className="text-white hover:bg-gray-700">Draft</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -560,7 +576,14 @@ const Dashboard = () => {
                   <div className="p-6 relative">
                     <div className="absolute top-0 right-0 h-1 w-full bg-gradient-to-r from-blue-500 to-purple-600"></div>
                     <div className="flex justify-between items-start mb-4">
-                      <h3 className="text-lg font-semibold text-white truncate">{form.name}</h3>
+                      <h3 className="text-lg font-semibold text-white truncate flex items-center gap-2">
+                        {form.name}
+                        {form.published ? (
+                          <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">Published</span>
+                        ) : (
+                          <span className="text-xs bg-gray-500/20 text-gray-400 px-2 py-0.5 rounded-full">Draft</span>
+                        )}
+                      </h3>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg">
@@ -568,24 +591,79 @@ const Dashboard = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700 rounded-lg shadow-xl">
+                          <DropdownMenuLabel className="text-gray-400">Form Actions</DropdownMenuLabel>
+                          <DropdownMenuSeparator className="bg-gray-700" />
                           <DropdownMenuItem 
+                            className="hover:bg-gray-700 cursor-pointer" 
                             onClick={() => navigate(`/form-builder/${form.id}`)}
-                            className="text-white hover:bg-gray-700 focus:bg-gray-700"
                           >
-                            <Edit3 className="h-4 w-4 mr-2 text-blue-400" />
-                            Edit
+                            <Edit3 className="h-4 w-4 mr-2 text-blue-500" />
+                            Edit Form
+                          </DropdownMenuItem>
+                          {form.published && (
+                            <>
+                              <DropdownMenuItem 
+                                className="hover:bg-gray-700 cursor-pointer"
+                                onClick={() => navigate(`/form/${form.id}`)}
+                              >
+                                <Eye className="h-4 w-4 mr-2 text-green-400" />
+                                View Form
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                className="hover:bg-gray-700 cursor-pointer"
+                                onClick={() => {
+                                  // Generate and copy shareable link
+                                  const shareableLink = `${window.location.origin}/form/${form.id}`;
+                                  navigator.clipboard.writeText(shareableLink);
+                                  toast({
+                                    title: "Link Copied",
+                                    description: "Shareable form link copied to clipboard"
+                                  });
+                                }}
+                              >
+                                <Link className="h-4 w-4 mr-2 text-blue-400" />
+                                Copy Shareable Link
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                          <DropdownMenuItem 
+                            className="hover:bg-gray-700 cursor-pointer"
+                            onClick={() => handleDuplicateForm(form)}
+                          >
+                            <Copy className="h-4 w-4 mr-2 text-green-500" />
+                            Duplicate
                           </DropdownMenuItem>
                           <DropdownMenuItem 
-                            onClick={() => handleDuplicateForm(form)}
-                            className="text-white hover:bg-gray-700 focus:bg-gray-700"
+                            className="hover:bg-gray-700 cursor-pointer"
+                            onClick={() => {
+                              // Toggle publish status
+                              const updatedForms = forms.map(f => {
+                                if (f.id === form.id) {
+                                  return {
+                                    ...f,
+                                    published: !f.published,
+                                    lastModified: new Date().toISOString()
+                                  };
+                                }
+                                return f;
+                              });
+                              setForms(updatedForms);
+                              localStorage.setItem('nifty-forms', JSON.stringify(updatedForms));
+                              toast({
+                                title: form.published ? "Form Unpublished" : "Form Published",
+                                description: form.published ? 
+                                  "The form is now in draft mode" : 
+                                  "The form is now available for submissions"
+                              });
+                            }}
                           >
-                            <Copy className="h-4 w-4 mr-2 text-purple-400" />
-                            Duplicate
+                            <Globe className="h-4 w-4 mr-2 text-purple-500" />
+                            {form.published ? "Unpublish" : "Publish"}
                           </DropdownMenuItem>
                           <DropdownMenuSeparator className="bg-gray-700" />
                           <DropdownMenuItem 
-                            onClick={() => handleDeleteForm(form.id)} 
-                            className="text-red-400 hover:text-red-300 hover:bg-gray-700 focus:bg-gray-700"
+                            className="hover:bg-red-900/30 text-red-400 hover:text-red-300 cursor-pointer"
+                            onClick={() => handleDeleteForm(form.id)}
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Delete
@@ -600,13 +678,14 @@ const Dashboard = () => {
                         Last modified {formatDate(form.lastModified)}
                       </div>
 
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between mt-4">
                         <div className="flex items-center gap-2">
                           <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs ${getStatusColor(form.submissions)}`}>
                             <CheckCircle2 className="h-3 w-3" />
                             <span>{form.submissions} submissions</span>
                           </div>
                         </div>
+                        
                         <motion.button
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
