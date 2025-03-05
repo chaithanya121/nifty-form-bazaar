@@ -94,7 +94,7 @@ const FormPreview = ({ formConfig, values, onChange, onSubmit, isSubmission = fa
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <h1 className="text-2xl font-bold mb-6">{formConfig.name}</h1>
+      {!isSubmission && <h1 className="text-2xl font-bold mb-6">{formConfig.name}</h1>}
 
       <div className="space-y-4">
         {groupedElements.map((group) => (
@@ -110,6 +110,7 @@ const FormPreview = ({ formConfig, values, onChange, onSubmit, isSubmission = fa
                 <div 
                   key={element.id} 
                   className={`${group.row ? "flex-1" : "w-full"} space-y-2`}
+                  style={element.fieldStyles}
                 >
                   <FormElementRenderer
                     element={element}
@@ -142,7 +143,10 @@ const FormPreview = ({ formConfig, values, onChange, onSubmit, isSubmission = fa
       )}
 
       {/* Submit Button */}
-      <Button type="submit" className="w-full">
+      <Button 
+        type="submit" 
+        className={`${isSubmission ? 'bg-blue-600 hover:bg-blue-700' : ''} w-full`}
+      >
         {formConfig.settings.submitButton?.text || "Submit"}
         <Send className="ml-2 h-4 w-4" />
       </Button>

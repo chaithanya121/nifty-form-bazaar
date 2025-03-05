@@ -25,6 +25,20 @@ const FormCanvas = ({ elements, setFormConfig, onSelectElement, selectedElement,
   const [dropPosition, setDropPosition] = useState<'left' | 'right' | 'above' | 'below' | null>(null);
   const [activeRowId, setActiveRowId] = useState<string | null>(null);
 
+  // Get canvas styles from form config
+  const canvasStyles = formConfig.settings.canvasStyles || {};
+  const canvasStylesObj = {
+    backgroundColor: canvasStyles.backgroundColor || '',
+    backgroundImage: canvasStyles.backgroundImage || '',
+    padding: canvasStyles.padding || '',
+    margin: canvasStyles.margin || '',
+    borderRadius: canvasStyles.borderRadius || '',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    minHeight: elements.length > 0 ? 'auto' : 'calc(100vh - 12rem)',
+    // height: canvasStyles.backgroundImage && canvasStyles.backgroundImage.includes('gradient') ? '100vh' : 'auto'
+  };
+
   const handleDelete = (id: string) => {
     setFormConfig((prev) => ({
       ...prev,
@@ -1461,7 +1475,10 @@ const FormCanvas = ({ elements, setFormConfig, onSelectElement, selectedElement,
   const groupedElements = groupElementsByLayout(elements);
 
   return (
-    <div className="space-y-4" style={formConfig.settings.canvasStyles}>
+    <div 
+      className="space-y-4 min-h-[calc(100vh-12rem)]"
+      style={canvasStylesObj}
+    >
       {elements.length === 0 ? (
         <div className="flex items-center justify-center h-64 border-2 border-dashed rounded-lg">
           <p className="text-muted-foreground">

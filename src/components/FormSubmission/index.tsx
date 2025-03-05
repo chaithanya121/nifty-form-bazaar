@@ -134,6 +134,20 @@ const FormSubmission = () => {
     );
   }
 
+  // Apply canvas styles from form config if available
+  const canvasStyles = form.config.settings.canvasStyles || {};
+  const canvasStylesObj = {
+    backgroundColor: canvasStyles.backgroundColor || '',
+    backgroundImage: canvasStyles.backgroundImage || '',
+    padding: canvasStyles.padding || '',
+    margin: canvasStyles.margin || '',
+    borderRadius: canvasStyles.borderRadius || '',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    // height: canvasStyles.backgroundImage && canvasStyles.backgroundImage.includes('gradient') ? '72vh' : 'auto',
+    // minHeight: 'calc(172vh - 16rem)'
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
       <header className="border-b border-gray-800 bg-gray-900 sticky top-0 z-50 shadow-md">
@@ -152,13 +166,16 @@ const FormSubmission = () => {
         </div>
       </header>
 
-      <div className="container mx-auto p-4">
+      <div className="container mx-auto p-4" style={{width: '38%'}}>
         <Card className="bg-gray-800 border-gray-700 p-6 mb-6">
           <h1 className="text-2xl font-bold mb-2">{form.config.name}</h1>
           <p className="text-gray-400">Please fill out the form below</p>
         </Card>
 
-        <Card className="bg-gray-800 border-gray-700 p-6">
+        <Card 
+          className="bg-gray-800 border-gray-700 p-6 min-h-[calc(72vh -16rem)]"
+          style={canvasStylesObj}
+        >
           <FormPreview 
             formConfig={form.config} 
             onChange={setFormValues}

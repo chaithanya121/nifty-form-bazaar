@@ -1,4 +1,3 @@
-
 import { FormElementRendererProps } from "./types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,7 +36,7 @@ const FormElementRenderer = ({
             onChange={handleChange}
             placeholder={element.placeholder}
             required={element.required}
-            style={element.fieldStyles}
+            style={element.fieldStyles || {}}
           />
         );
       case "textarea":
@@ -48,14 +47,14 @@ const FormElementRenderer = ({
             onChange={handleChange}
             placeholder={element.placeholder}
             required={element.required}
-            style={element.fieldStyles}
+            style={element.fieldStyles || {}}
             className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           />
         );
       case "select":
         return (
           <Select value={value} onValueChange={onChange}>
-            <SelectTrigger style={element.fieldStyles}>
+            <SelectTrigger style={element.fieldStyles || {}}>
               <SelectValue placeholder={element.placeholder} />
             </SelectTrigger>
             <SelectContent>
@@ -76,7 +75,7 @@ const FormElementRenderer = ({
               id={element.id}
               checked={value || false}
               onCheckedChange={onChange}
-              style={element.fieldStyles}
+              style={element.fieldStyles || {}}
             />
             <label
               htmlFor={element.id}
@@ -90,7 +89,7 @@ const FormElementRenderer = ({
         return (
           <RadioGroup value={value} onValueChange={onChange}>
             <div className="flex items-center space-x-2">
-              <RadioGroupItem value="default" id={element.id} style={element.fieldStyles} />
+              <RadioGroupItem value="default" id={element.id} style={element.fieldStyles || {}} />
               <label
                 htmlFor={element.id}
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -114,7 +113,7 @@ const FormElementRenderer = ({
             onChange={handleChange}
             placeholder={element.placeholder}
             required={element.required}
-            style={element.fieldStyles}
+            style={element.fieldStyles || {}}
           />
         );
       case "name":
@@ -128,7 +127,7 @@ const FormElementRenderer = ({
             onChange={handleChange}
             placeholder={element.placeholder}
             required={element.required}
-            style={element.fieldStyles}
+            style={element.fieldStyles || {}}
           />
         );
       case "appointment":
@@ -140,7 +139,7 @@ const FormElementRenderer = ({
             onChange={handleChange}
             placeholder={element.placeholder}
             required={element.required}
-            style={element.fieldStyles}
+            style={element.fieldStyles || {}}
           />
         );
       case "rating":
@@ -179,7 +178,7 @@ const FormElementRenderer = ({
               className="mt-2"
               placeholder="Enter the code above"
               required={element.required}
-              style={element.fieldStyles}
+              style={element.fieldStyles || {}}
             />
           </div>
         );
@@ -199,7 +198,7 @@ const FormElementRenderer = ({
   return (
     <div className="space-y-2">
       {!["h1", "h2", "h3", "p", "checkbox", "radio"].includes(element.type) && (
-        <Label htmlFor={element.id} style={element.labelStyles}>{element.label}</Label>
+        <Label htmlFor={element.id} style={element.labelStyles || {}}>{element.label}</Label>
       )}
       {renderElement()}
       {error && <p className="text-red-500 text-sm">{error}</p>}

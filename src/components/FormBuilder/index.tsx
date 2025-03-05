@@ -56,6 +56,7 @@ const PRESET_STYLES = {
     padding: "20px",
     margin: "10px",
     borderRadius: "8px",
+    backgroundImage: "",
   },
   "Dark Theme": {
     backgroundColor: "#1a1a1a",
@@ -63,8 +64,10 @@ const PRESET_STYLES = {
     padding: "20px",
     margin: "10px",
     borderRadius: "8px",
+    backgroundImage: "",
   },
   "Gradient Background": {
+    backgroundColor: "",
     backgroundImage: "linear-gradient(135deg, #6a11cb, #2575fc)",
     color: "#ffffff",
     padding: "20px",
@@ -200,6 +203,11 @@ const FormBuilder = () => {
         },
       },
     }));
+    
+    toast({
+      title: "Style Applied",
+      description: `Applied ${presetName} style to the form`,
+    });
   };
 
   const handleSaveForm = () => {
@@ -354,16 +362,19 @@ const FormBuilder = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-12 gap-4">
+        <div className={previewMode ?'justify-center align-center': "grid grid-cols-12 gap-4"} style={{display: previewMode ? 'flex' : 'grid'}}>
           {!previewMode ? (
             <>
               <Card className="col-span-3 bg-gray-800 border-gray-700 p-4">
                 <FormElementLibrary onDragStart={handleDragStart} />
               </Card>
               <Card
-                className="col-span-6 bg-gray-800 border-gray-700 p-4 min-h-[calc(100vh-10rem)]"
+                className="col-span-6 bg-gray-800 border-gray-700 p-4"
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
+                style={{
+                  overflow: 'hidden'
+                }}
               >
                 <FormCanvas
                   elements={formConfig.elements}
@@ -522,7 +533,20 @@ const FormBuilder = () => {
               </Card>
             </>
           ) : (
-            <Card className="col-span-12 bg-gray-800 border-gray-700 p-4">
+            <Card 
+              className="col-span-12 bg-gray-800 border-gray-700 p-4 "
+              style={{
+                backgroundColor: formConfig.settings.canvasStyles?.backgroundColor || '',
+                backgroundImage: formConfig.settings.canvasStyles?.backgroundImage || '',
+                padding: formConfig.settings.canvasStyles?.padding || '',
+                margin: formConfig.settings.canvasStyles?.margin || '',
+                borderRadius: formConfig.settings.canvasStyles?.borderRadius || '',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                height: 'auto',
+                width: '46%'
+              }}
+            >
               <FormPreview formConfig={formConfig} />
             </Card>
           )}
