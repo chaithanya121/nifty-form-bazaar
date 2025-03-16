@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,7 +23,9 @@ import {
   Palette,
   Sliders,
   Globe,
-  Link
+  Link,
+  FileCode,
+  BookOpen
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { FormConfig } from '@/components/FormBuilder/types';
@@ -109,7 +110,7 @@ const Dashboard = () => {
       totalForms: storedForms.length,
       totalSubmissions: storedForms.reduce((acc, form) => acc + form.submissions, 0),
       activeUsers: Math.floor(Math.random() * 100), // This is still mock data since we don't track real users
-      completionRate: 0 // Fix: Adding completionRate property
+      completionRate: 0 // Added completionRate property
     });
   }, [toast]);
 
@@ -295,16 +296,38 @@ const Dashboard = () => {
               </span>
             </div>
             
-            <div className="hidden md:flex items-center gap-6">
-              <button className="text-gray-300 hover:text-white">Templates</button>
-              <button className="text-gray-300 hover:text-white">Documentation</button>
-              <button className="text-gray-300 hover:text-white">Settings</button>
-            </div>
-            
             <div className="flex items-center gap-3">
-              <button className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
-                <Settings className="h-4 w-4 text-gray-300" />
-              </button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
+                    variant="ghost"
+                    size="icon"
+                  >
+                    <Settings className="h-4 w-4 text-gray-300" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 bg-gray-800 border-gray-700 text-gray-200">
+                  <DropdownMenuLabel className="text-gray-400">Settings</DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-gray-700" />
+                  <DropdownMenuItem className="cursor-pointer hover:bg-gray-700">
+                    <Layout className="mr-2 h-4 w-4 text-blue-400" />
+                    <span>Form Builder</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer hover:bg-gray-700">
+                    <FileCode className="mr-2 h-4 w-4 text-purple-400" />
+                    <span>Templates</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer hover:bg-gray-700">
+                    <BookOpen className="mr-2 h-4 w-4 text-green-400" />
+                    <span>Documentation</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer hover:bg-gray-700">
+                    <Settings className="mr-2 h-4 w-4 text-orange-400" />
+                    <span>Settings</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
