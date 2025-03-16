@@ -23,9 +23,7 @@ import {
   Palette,
   Sliders,
   Globe,
-  Link,
-  FileCode,
-  BookOpen
+  Link
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { FormConfig } from '@/components/FormBuilder/types';
@@ -85,7 +83,6 @@ const Dashboard = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Load forms from localStorage
     const storedFormsJson = localStorage.getItem('nifty-forms');
     let storedForms: FormData[] = [];
     
@@ -102,15 +99,13 @@ const Dashboard = () => {
       }
     }
     
-    // If no stored forms are found, use empty array
     setForms(storedForms || []);
     
-    // Update stats based on loaded forms
     setStats({
       totalForms: storedForms.length,
       totalSubmissions: storedForms.reduce((acc, form) => acc + form.submissions, 0),
-      activeUsers: Math.floor(Math.random() * 100), // This is still mock data since we don't track real users
-      completionRate: 0 // Added completionRate property
+      activeUsers: Math.floor(Math.random() * 100),
+      completionRate: 0
     });
   }, [toast]);
 
@@ -167,11 +162,9 @@ const Dashboard = () => {
       }
     };
 
-    // Update state
     const updatedForms = [newForm, ...forms];
     setForms(updatedForms);
     
-    // Update localStorage
     localStorage.setItem('nifty-forms', JSON.stringify(updatedForms));
     
     setStats(prev => ({
@@ -184,11 +177,9 @@ const Dashboard = () => {
   };
 
   const handleDeleteForm = (formId: string) => {
-    // Remove from state
     const updatedForms = forms.filter(form => form.id !== formId);
     setForms(updatedForms);
     
-    // Update localStorage
     localStorage.setItem('nifty-forms', JSON.stringify(updatedForms));
     
     setStats(prev => ({
@@ -212,11 +203,9 @@ const Dashboard = () => {
       published: false
     };
 
-    // Update state
     const updatedForms = [duplicatedForm, ...forms];
     setForms(updatedForms);
     
-    // Update localStorage
     localStorage.setItem('nifty-forms', JSON.stringify(updatedForms));
     
     setStats(prev => ({
@@ -233,7 +222,6 @@ const Dashboard = () => {
     if (!dateValue) return 'Unknown date';
     
     if (typeof dateValue === 'string') {
-      // Parse the ISO string to a Date object
       const date = new Date(dateValue);
       if (isNaN(date.getTime())) {
         return 'Invalid date';
@@ -241,7 +229,6 @@ const Dashboard = () => {
       return date.toLocaleDateString();
     }
     
-    // It's already a Date object
     return dateValue.toLocaleDateString();
   };
 
@@ -268,10 +255,8 @@ const Dashboard = () => {
 
   const filteredAndSortedForms = sortForms(
     forms.filter(form => {
-      // Apply search filter
       const matchesSearch = form.name.toLowerCase().includes(searchTerm.toLowerCase());
       
-      // Apply status filter
       let matchesStatus = true;
       if (filterStatus === 'published') {
         matchesStatus = form.published === true;
@@ -285,7 +270,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
-      {/* Header */}
       <header className="border-b border-gray-800 bg-gray-900 sticky top-0 z-50 shadow-md">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
@@ -296,51 +280,27 @@ const Dashboard = () => {
               </span>
             </div>
             
+            <div className="hidden md:flex items-center gap-6">
+              <button className="text-gray-300 hover:text-white">Templates</button>
+              <button className="text-gray-300 hover:text-white">Documentation</button>
+              <button className="text-gray-300 hover:text-white">Settings</button>
+            </div>
+            
             <div className="flex items-center gap-3">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button 
-                    className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
-                    variant="ghost"
-                    size="icon"
-                  >
-                    <Settings className="h-4 w-4 text-gray-300" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-gray-800 border-gray-700 text-gray-200">
-                  <DropdownMenuLabel className="text-gray-400">Settings</DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-gray-700" />
-                  <DropdownMenuItem className="cursor-pointer hover:bg-gray-700">
-                    <Layout className="mr-2 h-4 w-4 text-blue-400" />
-                    <span>Form Builder</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer hover:bg-gray-700">
-                    <FileCode className="mr-2 h-4 w-4 text-purple-400" />
-                    <span>Templates</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer hover:bg-gray-700">
-                    <BookOpen className="mr-2 h-4 w-4 text-green-400" />
-                    <span>Documentation</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer hover:bg-gray-700">
-                    <Settings className="mr-2 h-4 w-4 text-orange-400" />
-                    <span>Settings</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <button className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
+                <Settings className="h-4 w-4 text-gray-300" />
+              </button>
             </div>
           </div>
         </div>
       </header>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Dashboard Title */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-white mb-2">Dashboard</h1>
           <p className="text-gray-400">Manage your forms and view statistics</p>
         </div>
 
-        {/* Form Builder Quick Access */}
         <div className="mb-10 bg-gray-800/50 backdrop-blur-sm p-5 rounded-xl border border-gray-700/50 shadow-lg">
           <h2 className="text-lg font-medium text-white mb-4">Form Builder Tools</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
@@ -377,7 +337,6 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Stats Section */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -453,7 +412,6 @@ const Dashboard = () => {
           </motion.div>
         </motion.div>
 
-        {/* Actions Bar */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -544,7 +502,6 @@ const Dashboard = () => {
           </div>
         </motion.div>
 
-        {/* Recent Activity */}
         <div className="mb-10 bg-gray-800/50 backdrop-blur-sm p-5 rounded-xl border border-gray-700/50 shadow-lg">
           <h2 className="text-lg font-medium text-white mb-4">Recent Activity</h2>
           <div className="space-y-4">
@@ -580,7 +537,6 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Forms Grid */}
         <div className="mb-6">
           <h2 className="text-lg font-medium text-white mb-4">Your Forms</h2>
           <motion.div 
@@ -637,7 +593,6 @@ const Dashboard = () => {
                               <DropdownMenuItem 
                                 className="hover:bg-gray-700 cursor-pointer"
                                 onClick={() => {
-                                  // Generate and copy shareable link
                                   const shareableLink = `${window.location.origin}/form/${form.id}`;
                                   navigator.clipboard.writeText(shareableLink);
                                   toast({
@@ -661,7 +616,6 @@ const Dashboard = () => {
                           <DropdownMenuItem 
                             className="hover:bg-gray-700 cursor-pointer"
                             onClick={() => {
-                              // Toggle publish status
                               const updatedForms = forms.map(f => {
                                 if (f.id === form.id) {
                                   return {
@@ -729,7 +683,6 @@ const Dashboard = () => {
           </motion.div>
         </div>
 
-        {/* Empty State */}
         {filteredAndSortedForms.length === 0 && (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -760,7 +713,6 @@ const Dashboard = () => {
         )}
       </div>
       
-      {/* Footer */}
       <footer className="border-t border-gray-800 py-6 mt-12">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
