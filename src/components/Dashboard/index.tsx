@@ -270,31 +270,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
-      <header className="border-b border-gray-800 bg-gray-900 sticky top-0 z-50 shadow-md">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2">
-              <Layers className="h-6 w-6 text-blue-500" />
-              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">
-                Form Builder
-              </span>
-            </div>
-            
-            <div className="hidden md:flex items-center gap-6">
-              <button className="text-gray-300 hover:text-white">Templates</button>
-              <button className="text-gray-300 hover:text-white">Documentation</button>
-              <button className="text-gray-300 hover:text-white">Settings</button>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <button className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
-                <Settings className="h-4 w-4 text-gray-300" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-white mb-2">Dashboard</h1>
@@ -717,18 +692,4 @@ const Dashboard = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-2">
-              <Layers className="h-5 w-5 text-blue-500" />
-              <span className="text-lg font-bold text-white">Form Builder</span>
-            </div>
-            
-            <div className="text-sm text-gray-500">
-              &copy; 2025 Form Builder
-            </div>
-          </div>
-        </div>
-      </footer>
-    </div>
-  );
-};
-
-export default Dashboard;
+              <Layers className="h-5 w-
