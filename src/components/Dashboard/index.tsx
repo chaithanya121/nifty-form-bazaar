@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -107,7 +108,8 @@ const Dashboard = () => {
     setStats({
       totalForms: storedForms.length,
       totalSubmissions: storedForms.reduce((acc, form) => acc + form.submissions, 0),
-      activeUsers: Math.floor(Math.random() * 100) // This is still mock data since we don't track real users
+      activeUsers: Math.floor(Math.random() * 100), // This is still mock data since we don't track real users
+      completionRate: 0 // Fix: Adding completionRate property
     });
   }, [toast]);
 
