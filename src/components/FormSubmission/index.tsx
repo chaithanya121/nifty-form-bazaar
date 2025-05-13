@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -6,6 +7,7 @@ import { FormConfig } from '@/components/FormBuilder/types';
 import FormPreview from '@/components/FormBuilder/FormPreview';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, CheckCircle } from 'lucide-react';
+import { saveFormSubmission } from '@/lib/submission-utils';
 
 interface FormData {
   id: string;
@@ -66,35 +68,18 @@ const FormSubmission = () => {
   }, [id, navigate, toast]);
 
   const handleFormSubmit = () => {
-    if (!form) return;
+    if (!form || !id) return;
     
-    // Validate form values here if needed
-    
-    // Update submission count in localStorage
-    try {
-      const storedFormsJson = localStorage.getItem('nifty-forms');
-      if (storedFormsJson) {
-        const storedForms = JSON.parse(storedFormsJson);
-        const updatedForms = storedForms.map((storedForm: FormData) => {
-          if (storedForm.id === id) {
-            return {
-              ...storedForm,
-              submissions: storedForm.submissions + 1
-            };
-          }
-          return storedForm;
-        });
-        
-        localStorage.setItem('nifty-forms', JSON.stringify(updatedForms));
-      }
-    } catch (error) {
-      console.error('Error updating submission count:', error);
-    }
+    // Save submission data using our utility function
+    saveFormSubmission(id, formValues);
     
     // Show success message
     setSubmitted(true);
+    toast({
+      title: "Success",
+      description: "Form submitted successfully"
+    });
     
-    // In a real app, you would send the form data to a server here
     console.log('Form submitted with values:', formValues);
   };
 
@@ -144,8 +129,6 @@ const FormSubmission = () => {
     borderRadius: canvasStyles.borderRadius || '',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
-    // height: canvasStyles.backgroundImage && canvasStyles.backgroundImage.includes('gradient') ? '72vh' : 'auto',
-    // minHeight: 'calc(172vh - 16rem)'
   };
 
   return (
