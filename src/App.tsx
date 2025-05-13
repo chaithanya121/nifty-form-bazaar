@@ -19,10 +19,10 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <BrowserRouter>
-          <div className="relative">
+          <div className="relative min-h-screen bg-gradient-to-b from-slate-950 to-indigo-950/70">
             <TooltipProvider delayDuration={0}>
               <Header />
-              <main>
+              <main className="container mx-auto px-4 py-6 md:py-8">
                 <Routes>
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/forms" element={<Index />} />

@@ -53,16 +53,18 @@ const Header = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-slate-700/30 bg-gradient-to-r from-slate-950 via-indigo-950/90 to-slate-950 backdrop-blur-xl supports-[backdrop-filter]:bg-slate-950/80">
+    <header className="sticky top-0 z-50 w-full bg-gradient-to-r from-indigo-950 via-purple-900 to-indigo-950 backdrop-blur-xl border-b border-white/10 shadow-lg">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="md:hidden text-blue-100 hover:bg-indigo-900/40">
+          <Button variant="ghost" size="icon" className="md:hidden text-blue-100 hover:bg-indigo-700/30">
             <Menu className="h-5 w-5" />
           </Button>
-          <Link to="/" className="flex items-center gap-3">
+          
+          <Link to="/" className="flex items-center gap-3 group">
             <motion.div 
               initial={{ rotate: -10, scale: 0.9 }}
               animate={{ rotate: 0, scale: 1 }}
+              whileHover={{ scale: 1.05, rotate: 5 }}
               transition={{ 
                 type: "spring", 
                 stiffness: 260, 
@@ -71,10 +73,11 @@ const Header = () => {
               }}
               className="relative flex items-center justify-center w-10 h-10 rounded-xl overflow-hidden shadow-lg"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 opacity-90"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-700 opacity-90"></div>
               <FilePlus className="h-5 w-5 text-white relative z-10" />
-              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-white/40 opacity-50"></div>
+              <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
             </motion.div>
+            
             <div className="flex flex-col">
               <motion.span 
                 initial={{ opacity: 0, y: 5 }}
@@ -88,7 +91,7 @@ const Header = () => {
                 initial={{ opacity: 0, x: -5 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4, duration: 0.3 }}
-                className="text-xs font-medium text-indigo-400 -mt-1 tracking-wide sm:inline-block"
+                className="text-xs font-medium text-indigo-300 -mt-1 tracking-wide sm:inline-block"
               >
                 Pro
               </motion.span>
@@ -101,7 +104,7 @@ const Header = () => {
             <NavigationMenuList className="gap-1">
               <NavigationMenuItem>
                 <Link to="/">
-                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "gap-2 text-blue-100 hover:text-white hover:bg-indigo-900/40 rounded-xl transition-all duration-200")}>
+                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "gap-2 text-blue-100 hover:text-white hover:bg-indigo-700/30 rounded-xl transition-all duration-200")}>
                     <Home className="h-4 w-4" />
                     <span>Home</span>
                   </NavigationMenuLink>
@@ -109,7 +112,7 @@ const Header = () => {
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <Link to="/forms">
-                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "gap-2 text-blue-100 hover:text-white hover:bg-indigo-900/40 rounded-xl transition-all duration-200")}>
+                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "gap-2 text-blue-100 hover:text-white hover:bg-indigo-700/30 rounded-xl transition-all duration-200")}>
                     <FileText className="h-4 w-4" />
                     <span>Forms</span>
                   </NavigationMenuLink>
@@ -117,7 +120,7 @@ const Header = () => {
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <Link to="/create">
-                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "gap-2 text-blue-100 hover:text-white hover:bg-indigo-900/40 rounded-xl transition-all duration-200")}>
+                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "gap-2 text-blue-100 hover:text-white hover:bg-indigo-700/30 rounded-xl transition-all duration-200")}>
                     <FilePlus className="h-4 w-4" />
                     <span>Create</span>
                   </NavigationMenuLink>
@@ -127,20 +130,28 @@ const Header = () => {
           </NavigationMenu>
 
           {/* Mobile Navigation */}
-          <nav className="flex md:hidden items-center justify-center gap-1">
-            <Button variant="ghost" size="icon" asChild className="text-blue-100 hover:text-white hover:bg-indigo-900/40 rounded-xl transition-all duration-200">
+          <nav className="flex md:hidden items-center justify-center gap-2 absolute left-1/2 transform -translate-x-1/2">
+            <Button variant="ghost" size="icon" asChild className="relative text-blue-100 hover:text-white hover:bg-indigo-700/30 rounded-xl transition-all duration-200">
               <Link to="/">
                 <Home className="h-5 w-5" />
+                <span className="sr-only">Home</span>
+                <motion.span 
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 h-1 w-1 bg-blue-400 rounded-full"
+                />
               </Link>
             </Button>
-            <Button variant="ghost" size="icon" asChild className="text-blue-100 hover:text-white hover:bg-indigo-900/40 rounded-xl transition-all duration-200">
+            <Button variant="ghost" size="icon" asChild className="relative text-blue-100 hover:text-white hover:bg-indigo-700/30 rounded-xl transition-all duration-200">
               <Link to="/forms">
                 <FileText className="h-5 w-5" />
+                <span className="sr-only">Forms</span>
               </Link>
             </Button>
-            <Button variant="ghost" size="icon" asChild className="text-blue-100 hover:text-white hover:bg-indigo-900/40 rounded-xl transition-all duration-200">
+            <Button variant="ghost" size="icon" asChild className="relative text-blue-100 hover:text-white hover:bg-indigo-700/30 rounded-xl transition-all duration-200">
               <Link to="/create">
                 <FilePlus className="h-5 w-5" />
+                <span className="sr-only">Create</span>
               </Link>
             </Button>
           </nav>
@@ -150,20 +161,21 @@ const Header = () => {
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
-                    <Avatar className="h-9 w-9 border border-indigo-600/30 ring-2 ring-indigo-500/10 shadow-md transition-all duration-200 hover:ring-indigo-500/40">
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 overflow-hidden group">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full"></div>
+                    <Avatar className="h-9 w-9 border border-indigo-500/20 ring-2 ring-indigo-500/10 shadow-md transition-all duration-200 group-hover:ring-indigo-400/50">
                       <AvatarImage src={user?.avatar || undefined} alt={user?.name || ""} />
-                      <AvatarFallback className="bg-gradient-to-br from-indigo-700 to-indigo-900 text-indigo-100">
+                      <AvatarFallback className="bg-gradient-to-br from-indigo-600 to-purple-700 text-white">
                         {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-slate-900/95 backdrop-blur-md border border-indigo-500/20 text-indigo-100 shadow-xl rounded-xl p-1">
+                <DropdownMenuContent align="end" className="w-56 bg-indigo-950/95 backdrop-blur-md border border-indigo-500/20 text-indigo-100 shadow-xl rounded-xl p-1">
                   <div className="flex items-center gap-3 p-3 border-b border-indigo-500/20">
-                    <Avatar className="h-10 w-10 border border-indigo-600/30">
+                    <Avatar className="h-10 w-10 border border-indigo-500/30">
                       <AvatarImage src={user?.avatar || undefined} alt={user?.name || ""} />
-                      <AvatarFallback className="bg-gradient-to-br from-indigo-700 to-indigo-900 text-indigo-100">
+                      <AvatarFallback className="bg-gradient-to-br from-indigo-600 to-purple-700 text-white">
                         {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
                       </AvatarFallback>
                     </Avatar>
@@ -174,7 +186,7 @@ const Header = () => {
                   </div>
                   <DropdownMenuItem 
                     onClick={() => setSettingsOpen(true)}
-                    className="cursor-pointer hover:bg-indigo-800/30 py-2.5 mt-1 rounded-lg transition-colors duration-200"
+                    className="cursor-pointer hover:bg-indigo-700/30 py-2.5 mt-1 rounded-lg transition-colors duration-200"
                   >
                     <Settings className="mr-2 h-4 w-4 text-indigo-400" />
                     <span>Settings</span>
@@ -194,13 +206,13 @@ const Header = () => {
                 <Button 
                   variant="ghost" 
                   onClick={handleOpenSignIn}
-                  className="text-blue-100 hover:text-white hover:bg-indigo-900/40 rounded-xl transition-all duration-200"
+                  className="text-blue-100 hover:text-white hover:bg-indigo-700/30 rounded-xl transition-all duration-200"
                 >
                   Sign In
                 </Button>
                 <Button 
                   onClick={handleOpenSignUp}
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white hidden sm:flex border-0 shadow-md rounded-xl transition-all duration-200"
+                  className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white hidden sm:flex border-0 shadow-md rounded-xl transition-all duration-200"
                 >
                   Register
                 </Button>
@@ -208,7 +220,7 @@ const Header = () => {
                   variant="ghost" 
                   size="icon" 
                   onClick={handleOpenSignIn}
-                  className="sm:hidden text-blue-100 hover:text-white hover:bg-indigo-900/40 rounded-xl transition-all duration-200"
+                  className="sm:hidden text-blue-100 hover:text-white hover:bg-indigo-700/30 rounded-xl transition-all duration-200"
                 >
                   <UserCircle className="h-5 w-5" />
                 </Button>
