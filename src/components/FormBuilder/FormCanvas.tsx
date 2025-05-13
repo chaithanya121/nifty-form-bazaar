@@ -1,4 +1,3 @@
-
 import { FormCanvasProps, FormElement } from "./types";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@radix-ui/react-tooltip";
 import { useState, useEffect, useRef } from "react";
+import { Calendar } from "lucide-react";
 
 const FormCanvas = ({ elements, setFormConfig, onSelectElement, selectedElement, formConfig, onUpdate}: FormCanvasProps) => {    
   const { toast } = useToast();
@@ -363,6 +363,25 @@ const FormCanvas = ({ elements, setFormConfig, onSelectElement, selectedElement,
         return <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">{element.label}</h3>;
       case "p":
         return <p className="leading-7 [&:not(:first-child)]:mt-6">{element.label}</p>;
+      case "date":
+        return (
+          <div className="relative w-full">
+            <Button variant="outline" className="w-full justify-start text-left">
+              <Calendar className="mr-2 h-4 w-4" />
+              <span>{element.placeholder || "Select a date"}</span>
+            </Button>
+          </div>
+        );
+      case "form_submit":
+        return (
+          <Button 
+            type="submit" 
+            className="w-full"
+          >
+            {element.label || "Submit"}
+            <Send className="ml-2 h-4 w-4" />
+          </Button>
+        );
       default:
         return null;
     }

@@ -21,6 +21,7 @@ export type FormElementType =
   | "appointment"
   | "rating"
   | "captcha"
+  | "date"
   | "h1"
   | "h2"
   | "h3"
