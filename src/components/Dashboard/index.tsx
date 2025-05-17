@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,7 +24,9 @@ import {
   Palette,
   Sliders,
   Globe,
-  Link
+  Link,
+  LogIn,
+  UserPlus
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { FormConfig } from '@/components/FormBuilder/types';
@@ -55,6 +58,9 @@ import {
 } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { motion } from 'framer-motion';
+import { useAuth } from '@/hooks/use-auth';
+import { SignInForm } from '../auth/SignInForm';
+import { SignUpForm } from '../auth/SignUpForm';
 
 interface FormData {
   id: string;
@@ -79,35 +85,40 @@ const Dashboard = () => {
   const [newFormName, setNewFormName] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'date' | 'submissions'>('date');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'archived' | 'published' | 'draft'>('all');
+  const [authTab, setAuthTab] = useState<'signin' | 'signup'>('signin');
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
-    const storedFormsJson = localStorage.getItem('nifty-forms');
-    let storedForms: FormData[] = [];
-    
-    if (storedFormsJson) {
-      try {
-        storedForms = JSON.parse(storedFormsJson);
-      } catch (error) {
-        console.error('Error parsing stored forms:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load saved forms",
-          variant: "destructive"
-        });
+    if (isAuthenticated) {
+      const storedFormsJson = localStorage.getItem('nifty-forms');
+      let storedForms: FormData[] = [];
+      
+      if (storedFormsJson) {
+        try {
+          storedForms = JSON.parse(storedFormsJson);
+        } catch (error) {
+          console.error('Error parsing stored forms:', error);
+          toast({
+            title: "Error",
+            description: "Failed to load saved forms",
+            variant: "destructive"
+          });
+        }
       }
+      
+      setForms(storedForms || []);
+      
+      setStats({
+        totalForms: storedForms.length,
+        totalSubmissions: storedForms.reduce((acc, form) => acc + form.submissions, 0),
+        activeUsers: Math.floor(Math.random() * 100),
+        completionRate: storedForms.length > 0 ? 
+          Math.round((storedForms.filter(f => f.published).length / storedForms.length) * 100) : 0
+      });
     }
-    
-    setForms(storedForms || []);
-    
-    setStats({
-      totalForms: storedForms.length,
-      totalSubmissions: storedForms.reduce((acc, form) => acc + form.submissions, 0),
-      activeUsers: Math.floor(Math.random() * 100),
-      completionRate: 0
-    });
-  }, [toast]);
+  }, [toast, isAuthenticated]);
 
   const handleCreateForm = () => {
     if (!newFormName.trim()) {
@@ -268,13 +279,109 @@ const Dashboard = () => {
     })
   );
 
+  // Unauthenticated view
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
+        <div className="container mx-auto px-4 py-12">
+          <div className="flex flex-col items-center justify-center text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-8"
+            >
+              <Layers className="h-16 w-16 text-blue-500 mx-auto mb-4" />
+              <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600 mb-4">
+                Welcome to Form Builder Pro
+              </h1>
+              <p className="text-gray-400 text-lg max-w-2xl mx-auto mb-8">
+                Create, manage, and analyze forms with an intuitive drag-and-drop interface.
+                Sign in to start building powerful forms for your business.
+              </p>
+            </motion.div>
+
+            <div className="w-full max-w-md bg-gray-800/50 backdrop-blur-sm p-6 rounded-xl border border-gray-700/50 shadow-lg">
+              <div className="flex mb-6">
+                <button
+                  className={`flex-1 py-2 px-4 text-center ${
+                    authTab === 'signin'
+                      ? 'bg-blue-600 text-white rounded-l-lg'
+                      : 'bg-gray-700 text-gray-300 rounded-l-lg'
+                  }`}
+                  onClick={() => setAuthTab('signin')}
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <LogIn className="h-4 w-4" />
+                    <span>Sign In</span>
+                  </div>
+                </button>
+                <button
+                  className={`flex-1 py-2 px-4 text-center ${
+                    authTab === 'signup'
+                      ? 'bg-blue-600 text-white rounded-r-lg'
+                      : 'bg-gray-700 text-gray-300 rounded-r-lg'
+                  }`}
+                  onClick={() => setAuthTab('signup')}
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <UserPlus className="h-4 w-4" />
+                    <span>Sign Up</span>
+                  </div>
+                </button>
+              </div>
+
+              {authTab === 'signin' ? <SignInForm /> : <SignUpForm />}
+            </div>
+
+            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+              <Card className="bg-gray-800/30 border-gray-700 p-6 shadow-md rounded-lg">
+                <div className="p-3 bg-blue-500/10 rounded-full w-12 h-12 flex items-center justify-center mb-4">
+                  <Layout className="h-6 w-6 text-blue-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">Intuitive Builder</h3>
+                <p className="text-gray-400">
+                  Drag-and-drop form builder that makes creating complex forms simple.
+                </p>
+              </Card>
+
+              <Card className="bg-gray-800/30 border-gray-700 p-6 shadow-md rounded-lg">
+                <div className="p-3 bg-green-500/10 rounded-full w-12 h-12 flex items-center justify-center mb-4">
+                  <BarChart2 className="h-6 w-6 text-green-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">Advanced Analytics</h3>
+                <p className="text-gray-400">
+                  Track submissions and gain insights with comprehensive analytics.
+                </p>
+              </Card>
+
+              <Card className="bg-gray-800/30 border-gray-700 p-6 shadow-md rounded-lg">
+                <div className="p-3 bg-purple-500/10 rounded-full w-12 h-12 flex items-center justify-center mb-4">
+                  <Palette className="h-6 w-6 text-purple-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">Custom Themes</h3>
+                <p className="text-gray-400">
+                  Personalize your forms with custom themes and branding elements.
+                </p>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Authenticated view - original dashboard
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-white mb-2">Form Builder Dashboard</h1>
-          <p className="text-gray-400">Manage your forms and view statistics</p>
-        </div>
+        {user && (
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-white mb-2">
+              Welcome back, {user.name || 'User'}!
+            </h1>
+            <p className="text-gray-400">Manage your forms and view statistics</p>
+          </div>
+        )}
 
         <div className="mb-10 bg-gray-800/50 backdrop-blur-sm p-5 rounded-xl border border-gray-700/50 shadow-lg">
           <h2 className="text-lg font-medium text-white mb-4">Form Builder Tools</h2>
