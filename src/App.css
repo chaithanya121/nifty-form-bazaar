@@ -1,42 +1,103 @@
+
+/* Base styles */
 #root {
-  max-width: 1280px;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0;
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* Gradient backgrounds */
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
 }
 
-@keyframes logo-spin {
+.bg-gradient-secondary {
+  background: linear-gradient(225deg, #FFE29F 0%, #FFA99F 48%, #FF719A 100%);
+}
+
+.bg-gradient-dark {
+  background: linear-gradient(to right, #243949 0%, #517fa4 100%);
+}
+
+/* Glass effect */
+.glass-morphism {
+  backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.3);
+}
+
+.neo-blur {
+  backdrop-filter: blur(16px);
+  background-color: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Text gradients */
+.text-gradient {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  background-image: linear-gradient(to right, #fff, rgba(255, 255, 255, 0.7));
+}
+
+.text-gradient-primary {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  background-image: linear-gradient(to right, #3b82f6, #8b5cf6);
+}
+
+/* Animations */
+@keyframes fadeIn {
   from {
-    transform: rotate(0deg);
+    opacity: 0;
+    transform: translateY(10px);
   }
   to {
-    transform: rotate(360deg);
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.8;
   }
 }
 
-.card {
-  padding: 2em;
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
 }
 
-.read-the-docs {
-  color: #888;
+.animate-pulse-slow {
+  animation: pulse 3s infinite;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.8);
 }

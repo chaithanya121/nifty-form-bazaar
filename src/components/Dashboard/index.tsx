@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,7 +26,9 @@ import {
   Globe,
   Link,
   LogIn,
-  UserPlus
+  UserPlus,
+  FileImage,
+  Heading,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { FormConfig } from '@/components/FormBuilder/types';
@@ -70,6 +73,59 @@ interface FormData {
   published: boolean;
   config: FormConfig;
 }
+
+// Featured form templates for inspiration
+const formTemplates = [
+  { 
+    name: "Contact Form", 
+    description: "Collect user inquiries and contact information",
+    image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=200&q=80"
+  },
+  { 
+    name: "Event Registration", 
+    description: "Register attendees for your next event",
+    image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=200&q=80"
+  },
+  { 
+    name: "Customer Survey", 
+    description: "Gather feedback from your customers",
+    image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&h=200&q=80"
+  },
+];
+
+// Features list
+const builderFeatures = [
+  {
+    icon: <Layout className="h-6 w-6 text-blue-400" />,
+    title: "Drag & Drop Builder",
+    description: "Intuitive form building with no coding required"
+  },
+  {
+    icon: <Palette className="h-6 w-6 text-purple-400" />,
+    title: "Custom Themes",
+    description: "Brand your forms with custom colors and styles"
+  },
+  {
+    icon: <FileImage className="h-6 w-6 text-orange-400" />,
+    title: "Media Support",
+    description: "Add images and videos to your forms"
+  },
+  {
+    icon: <Code className="h-6 w-6 text-green-400" />,
+    title: "Logic Rules",
+    description: "Create conditional logic for dynamic forms"
+  },
+  {
+    icon: <Globe className="h-6 w-6 text-indigo-400" />,
+    title: "Instant Publishing",
+    description: "Share your forms with a single click"
+  },
+  {
+    icon: <BarChart2 className="h-6 w-6 text-red-400" />,
+    title: "Advanced Analytics",
+    description: "Track submissions and analyze responses"
+  },
+];
 
 const Dashboard = () => {
   const [forms, setForms] = useState<FormData[]>([]);
@@ -283,23 +339,85 @@ const Dashboard = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
         <div className="container mx-auto px-4 py-12">
+          {/* Hero Section */}
           <div className="flex flex-col items-center justify-center text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-8"
+              transition={{ duration: 0.6 }}
+              className="mb-8 max-w-4xl"
             >
-              <Layers className="h-16 w-16 text-blue-500 mx-auto mb-4" />
-              <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600 mb-4">
-                Welcome to Form Builder Pro
+              <div className="relative mx-auto w-24 h-24 mb-6">
+                <div className="absolute inset-0 bg-blue-500/20 rounded-full animate-pulse"></div>
+                <div className="absolute inset-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                  <Layers className="h-12 w-12 text-white" />
+                </div>
+                <div className="absolute -right-4 -bottom-2 bg-green-500 rounded-full p-2 border-2 border-gray-900">
+                  <CheckCircle2 className="h-4 w-4 text-white" />
+                </div>
+              </div>
+              
+              <h1 className="text-4xl md:text-6xl font-bold mb-6">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
+                  Form Builder Pro
+                </span>
               </h1>
-              <p className="text-gray-400 text-lg max-w-2xl mx-auto mb-8">
-                Create, manage, and analyze forms with an intuitive drag-and-drop interface.
-                Sign in to start building powerful forms for your business.
-              </p>
+              
+              <motion.p 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.8 }}
+                className="text-gray-300 text-xl max-w-3xl mx-auto mb-8 leading-relaxed"
+              >
+                Create stunning forms with our intuitive drag-and-drop builder. No coding required.
+                Perfect for surveys, registration forms, lead generation, and more.
+              </motion.p>
+              
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5 }}
+                className="flex flex-wrap justify-center gap-4 mb-12"
+              >
+                <Button 
+                  onClick={() => setAuthTab('signin')}
+                  className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 text-white px-8 py-6 rounded-xl text-lg font-medium border-0 shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  Get Started Free
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="bg-gray-800/50 text-white border-gray-600 hover:bg-gray-700/50 px-8 py-6 rounded-xl text-lg font-medium shadow-lg transition-all duration-300"
+                >
+                  Watch Demo
+                </Button>
+              </motion.div>
+              
+              {/* Form Preview Image */}
+              <div className="relative mx-auto max-w-4xl">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl blur-xl"></div>
+                <motion.div 
+                  initial={{ y: 100, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.7, duration: 0.8 }}
+                  className="relative bg-gray-800/70 backdrop-blur-sm border border-gray-700/50 rounded-xl overflow-hidden shadow-2xl"
+                >
+                  <img 
+                    src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&h=600&q=80" 
+                    alt="Form Builder Dashboard" 
+                    className="w-full h-auto opacity-90"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 to-transparent flex items-end">
+                    <div className="p-6 text-left">
+                      <h3 className="text-2xl font-bold text-white mb-2">Beautiful Form Builder</h3>
+                      <p className="text-gray-300">Create forms with our intuitive drag-and-drop interface.</p>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
             </motion.div>
 
-            <div className="w-full max-w-md bg-gray-800/50 backdrop-blur-sm p-6 rounded-xl border border-gray-700/50 shadow-lg">
+            <div className="w-full max-w-md bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl border border-gray-700/50 shadow-lg my-16">
               <div className="flex mb-6">
                 <button
                   className={`flex-1 py-2 px-4 text-center ${
@@ -341,93 +459,233 @@ const Dashboard = () => {
                 }} />
               )}
             </div>
-
-            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-              <Card className="bg-gray-800/30 border-gray-700 p-6 shadow-md rounded-lg">
-                <div className="p-3 bg-blue-500/10 rounded-full w-12 h-12 flex items-center justify-center mb-4">
-                  <Layout className="h-6 w-6 text-blue-400" />
+            
+            {/* Features Section */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8, duration: 0.8 }}
+              className="w-full py-16"
+            >
+              <h2 className="text-3xl font-bold mb-2">Powerful Features</h2>
+              <p className="text-gray-400 mb-10">All the tools you need to create and manage forms</p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                {builderFeatures.map((feature, index) => (
+                  <motion.div 
+                    key={feature.title}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 * index }}
+                    className="bg-gray-800/30 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6 hover:bg-gray-800/50 transition-all duration-300 hover:shadow-lg group"
+                  >
+                    <div className="p-3 bg-gray-700/50 rounded-xl w-14 h-14 flex items-center justify-center mb-4 group-hover:bg-blue-900/30 transition-all duration-300">
+                      {feature.icon}
+                    </div>
+                    <h3 className="text-xl font-semibold text-white mb-2">{feature.title}</h3>
+                    <p className="text-gray-400">{feature.description}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+            
+            {/* Templates Section */}
+            <div className="w-full py-16">
+              <h2 className="text-3xl font-bold mb-2">Ready-to-Use Templates</h2>
+              <p className="text-gray-400 mb-10">Jump start your form creation with our professionally-designed templates</p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                {formTemplates.map((template, index) => (
+                  <motion.div 
+                    key={template.name}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.3 * index }}
+                    className="bg-gray-800/30 backdrop-blur-sm border border-gray-700/50 rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 group"
+                  >
+                    <div className="relative h-48 overflow-hidden">
+                      <img 
+                        src={template.image} 
+                        alt={template.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div>
+                      <div className="absolute bottom-0 left-0 p-4">
+                        <h3 className="text-xl font-semibold text-white">{template.name}</h3>
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <p className="text-gray-400 mb-4">{template.description}</p>
+                      <Button onClick={() => setAuthTab('signin')} variant="secondary" size="sm" className="w-full">
+                        Use Template
+                      </Button>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Testimonials */}
+            <div className="w-full py-16 bg-gradient-to-b from-transparent to-gray-800/30 rounded-2xl my-10">
+              <h2 className="text-3xl font-bold mb-16">Trusted by Businesses</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6 shadow-lg">
+                  <div className="flex items-center mb-4">
+                    <div className="h-12 w-12 rounded-full bg-blue-600 flex items-center justify-center mr-4">
+                      <span className="text-xl font-bold text-white">A</span>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-white">Alex Johnson</h4>
+                      <p className="text-sm text-gray-400">Marketing Director</p>
+                    </div>
+                  </div>
+                  <p className="text-gray-300 italic">"Form Builder Pro transformed how we collect lead information. Our conversion rate increased by 40% in just one month!"</p>
                 </div>
-                <h3 className="text-lg font-semibold text-white mb-2">Intuitive Builder</h3>
-                <p className="text-gray-400">
-                  Drag-and-drop form builder that makes creating complex forms simple.
-                </p>
-              </Card>
-
-              <Card className="bg-gray-800/30 border-gray-700 p-6 shadow-md rounded-lg">
-                <div className="p-3 bg-green-500/10 rounded-full w-12 h-12 flex items-center justify-center mb-4">
-                  <BarChart2 className="h-6 w-6 text-green-400" />
+                
+                <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6 shadow-lg">
+                  <div className="flex items-center mb-4">
+                    <div className="h-12 w-12 rounded-full bg-purple-600 flex items-center justify-center mr-4">
+                      <span className="text-xl font-bold text-white">S</span>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-white">Sarah Miller</h4>
+                      <p className="text-sm text-gray-400">Event Manager</p>
+                    </div>
+                  </div>
+                  <p className="text-gray-300 italic">"The event registration templates saved us countless hours. Setting up our conference registration was a breeze."</p>
                 </div>
-                <h3 className="text-lg font-semibold text-white mb-2">Advanced Analytics</h3>
-                <p className="text-gray-400">
-                  Track submissions and gain insights with comprehensive analytics.
-                </p>
-              </Card>
-
-              <Card className="bg-gray-800/30 border-gray-700 p-6 shadow-md rounded-lg">
-                <div className="p-3 bg-purple-500/10 rounded-full w-12 h-12 flex items-center justify-center mb-4">
-                  <Palette className="h-6 w-6 text-purple-400" />
+                
+                <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6 shadow-lg">
+                  <div className="flex items-center mb-4">
+                    <div className="h-12 w-12 rounded-full bg-green-600 flex items-center justify-center mr-4">
+                      <span className="text-xl font-bold text-white">M</span>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-white">Michael Chen</h4>
+                      <p className="text-sm text-gray-400">Product Owner</p>
+                    </div>
+                  </div>
+                  <p className="text-gray-300 italic">"The analytics dashboard gives us incredible insights into our customer feedback. It's become an essential tool for our product team."</p>
                 </div>
-                <h3 className="text-lg font-semibold text-white mb-2">Custom Themes</h3>
-                <p className="text-gray-400">
-                  Personalize your forms with custom themes and branding elements.
-                </p>
-              </Card>
+              </div>
             </div>
           </div>
         </div>
+        
+        {/* Footer */}
+        <footer className="border-t border-gray-800 py-12 mt-12 bg-gray-900/80 backdrop-blur-sm">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <Layers className="h-6 w-6 text-blue-500" />
+                  <span className="text-xl font-bold text-white">Form Builder Pro</span>
+                </div>
+                <p className="text-sm text-gray-400 mb-4">Create beautiful forms in minutes with our intuitive drag-and-drop form builder.</p>
+              </div>
+              
+              <div>
+                <h4 className="text-lg font-semibold text-white mb-4">Product</h4>
+                <ul className="space-y-2 text-sm">
+                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">Features</a></li>
+                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">Templates</a></li>
+                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">Integrations</a></li>
+                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">Pricing</a></li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 className="text-lg font-semibold text-white mb-4">Resources</h4>
+                <ul className="space-y-2 text-sm">
+                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">Documentation</a></li>
+                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">Guides</a></li>
+                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">Blog</a></li>
+                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">Support</a></li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 className="text-lg font-semibold text-white mb-4">Company</h4>
+                <ul className="space-y-2 text-sm">
+                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">About</a></li>
+                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">Careers</a></li>
+                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">Contact</a></li>
+                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">Privacy</a></li>
+                </ul>
+              </div>
+            </div>
+            
+            <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+              <p className="text-sm text-gray-500">© 2025 Form Builder Pro. All rights reserved.</p>
+              <div className="flex items-center gap-4 mt-4 md:mt-0">
+                <a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">
+                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
+                  </svg>
+                </a>
+                <a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">
+                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" />
+                  </svg>
+                </a>
+                <a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">
+                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </footer>
       </div>
     );
   }
 
-  // Authenticated view - original dashboard
+  // Authenticated view - Dashboard
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
       <div className="container mx-auto px-4 py-8">
+        {/* Welcome Section with User Profile */}
         {user && (
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-white mb-2">
-              Welcome back, {user.name || 'User'}!
-            </h1>
-            <p className="text-gray-400">Manage your forms and view statistics</p>
-          </div>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-10 p-6 bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 shadow-lg"
+          >
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+              <div className="relative w-20 h-20 flex-shrink-0">
+                <div className="absolute inset-0 bg-blue-500/20 rounded-full animate-pulse"></div>
+                <div className="absolute inset-1 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                  {user.avatar ? (
+                    <img src={user.avatar} alt={user.name || "User"} className="rounded-full w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-2xl font-bold text-white">
+                      {user.name ? user.name.charAt(0).toUpperCase() : "U"}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">
+                  Welcome back, <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">{user.name || 'User'}</span>!
+                </h1>
+                <p className="text-gray-400">Create and manage your forms with our powerful builder</p>
+              </div>
+              <div className="ml-auto hidden md:flex">
+                <Button
+                  onClick={() => setIsCreateFormOpen(true)}
+                  className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 text-white px-6 py-6 rounded-xl text-lg font-medium border-0 shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  <PlusCircle className="mr-2 h-5 w-5" />
+                  Create New Form
+                </Button>
+              </div>
+            </div>
+          </motion.div>
         )}
 
-        <div className="mb-10 bg-gray-800/50 backdrop-blur-sm p-5 rounded-xl border border-gray-700/50 shadow-lg">
-          <h2 className="text-lg font-medium text-white mb-4">Form Builder Tools</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            <button 
-              onClick={() => setIsCreateFormOpen(true)}
-              className="bg-gradient-to-br from-gray-800 to-gray-850 hover:from-gray-750 hover:to-gray-800 border border-gray-700 rounded-lg p-4 flex flex-col items-center justify-center gap-2 transition-all duration-200 group"
-            >
-              <div className="p-3 bg-blue-500/10 rounded-full group-hover:bg-blue-500/20 transition-colors">
-                <PlusCircle className="h-6 w-6 text-blue-400" />
-              </div>
-              <span className="text-sm font-medium text-white">New Form</span>
-            </button>
-            
-            <button className="bg-gradient-to-br from-gray-800 to-gray-850 hover:from-gray-750 hover:to-gray-800 border border-gray-700 rounded-lg p-4 flex flex-col items-center justify-center gap-2 transition-all duration-200 group">
-              <div className="p-3 bg-purple-500/10 rounded-full group-hover:bg-purple-500/20 transition-colors">
-                <Layout className="h-6 w-6 text-purple-400" />
-              </div>
-              <span className="text-sm font-medium text-white">Templates</span>
-            </button>
-            
-            <button className="bg-gradient-to-br from-gray-800 to-gray-850 hover:from-gray-750 hover:to-gray-800 border border-gray-700 rounded-lg p-4 flex flex-col items-center justify-center gap-2 transition-all duration-200 group">
-              <div className="p-3 bg-green-500/10 rounded-full group-hover:bg-green-500/20 transition-colors">
-                <Sliders className="h-6 w-6 text-green-400" />
-              </div>
-              <span className="text-sm font-medium text-white">Form Settings</span>
-            </button>
-            
-            <button className="bg-gradient-to-br from-gray-800 to-gray-850 hover:from-gray-750 hover:to-gray-800 border border-gray-700 rounded-lg p-4 flex flex-col items-center justify-center gap-2 transition-all duration-200 group">
-              <div className="p-3 bg-orange-500/10 rounded-full group-hover:bg-orange-500/20 transition-colors">
-                <Palette className="h-6 w-6 text-orange-400" />
-              </div>
-              <span className="text-sm font-medium text-white">Themes</span>
-            </button>
-          </div>
-        </div>
-
+        {/* Dashboard Stats */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -503,6 +761,110 @@ const Dashboard = () => {
           </motion.div>
         </motion.div>
 
+        {/* Form Builder Tools */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="mb-10 bg-gray-800/50 backdrop-blur-sm p-5 rounded-xl border border-gray-700/50 shadow-lg"
+        >
+          <h2 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
+            <Heading className="h-5 w-5 text-blue-400" />
+            Form Builder Tools
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <motion.button 
+              whileHover={{ scale: 1.05, y: -5 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setIsCreateFormOpen(true)}
+              className="bg-gradient-to-br from-gray-800 to-gray-850 hover:from-gray-750 hover:to-gray-800 border border-gray-700 rounded-lg p-4 flex flex-col items-center justify-center gap-2 transition-all duration-200 group"
+            >
+              <div className="p-3 bg-blue-500/10 rounded-full group-hover:bg-blue-500/20 transition-colors">
+                <PlusCircle className="h-6 w-6 text-blue-400" />
+              </div>
+              <span className="text-sm font-medium text-white">New Form</span>
+            </motion.button>
+            
+            <motion.button 
+              whileHover={{ scale: 1.05, y: -5 }}
+              whileTap={{ scale: 0.95 }}
+              className="bg-gradient-to-br from-gray-800 to-gray-850 hover:from-gray-750 hover:to-gray-800 border border-gray-700 rounded-lg p-4 flex flex-col items-center justify-center gap-2 transition-all duration-200 group"
+            >
+              <div className="p-3 bg-purple-500/10 rounded-full group-hover:bg-purple-500/20 transition-colors">
+                <Layout className="h-6 w-6 text-purple-400" />
+              </div>
+              <span className="text-sm font-medium text-white">Templates</span>
+            </motion.button>
+            
+            <motion.button 
+              whileHover={{ scale: 1.05, y: -5 }}
+              whileTap={{ scale: 0.95 }}
+              className="bg-gradient-to-br from-gray-800 to-gray-850 hover:from-gray-750 hover:to-gray-800 border border-gray-700 rounded-lg p-4 flex flex-col items-center justify-center gap-2 transition-all duration-200 group"
+            >
+              <div className="p-3 bg-green-500/10 rounded-full group-hover:bg-green-500/20 transition-colors">
+                <Sliders className="h-6 w-6 text-green-400" />
+              </div>
+              <span className="text-sm font-medium text-white">Form Settings</span>
+            </motion.button>
+            
+            <motion.button 
+              whileHover={{ scale: 1.05, y: -5 }}
+              whileTap={{ scale: 0.95 }}
+              className="bg-gradient-to-br from-gray-800 to-gray-850 hover:from-gray-750 hover:to-gray-800 border border-gray-700 rounded-lg p-4 flex flex-col items-center justify-center gap-2 transition-all duration-200 group"
+            >
+              <div className="p-3 bg-orange-500/10 rounded-full group-hover:bg-orange-500/20 transition-colors">
+                <Palette className="h-6 w-6 text-orange-400" />
+              </div>
+              <span className="text-sm font-medium text-white">Themes</span>
+            </motion.button>
+          </div>
+        </motion.div>
+
+        {/* Recent Activity */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="mb-10 bg-gray-800/50 backdrop-blur-sm p-5 rounded-xl border border-gray-700/50 shadow-lg"
+        >
+          <h2 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
+            <Clock className="h-5 w-5 text-blue-400" />
+            Recent Activity
+          </h2>
+          <div className="space-y-4">
+            <div className="flex items-start gap-3 p-3 bg-gray-800/70 rounded-lg">
+              <div className="p-2 bg-blue-500/10 rounded-full">
+                <Edit3 className="h-4 w-4 text-blue-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-white">You edited <span className="font-medium">Contact Form</span></p>
+                <p className="text-xs text-gray-400">2 hours ago</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start gap-3 p-3 bg-gray-800/70 rounded-lg">
+              <div className="p-2 bg-green-500/10 rounded-full">
+                <PlusCircle className="h-4 w-4 text-green-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-white">You created <span className="font-medium">Feedback Survey</span></p>
+                <p className="text-xs text-gray-400">Yesterday</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start gap-3 p-3 bg-gray-800/70 rounded-lg">
+              <div className="p-2 bg-purple-500/10 rounded-full">
+                <CheckCircle2 className="h-4 w-4 text-purple-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-white">New submission on <span className="font-medium">Registration Form</span></p>
+                <p className="text-xs text-gray-400">2 days ago</p>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Form Search and Filters */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -593,43 +955,12 @@ const Dashboard = () => {
           </div>
         </motion.div>
 
-        <div className="mb-10 bg-gray-800/50 backdrop-blur-sm p-5 rounded-xl border border-gray-700/50 shadow-lg">
-          <h2 className="text-lg font-medium text-white mb-4">Recent Activity</h2>
-          <div className="space-y-4">
-            <div className="flex items-start gap-3 p-3 bg-gray-800/70 rounded-lg">
-              <div className="p-2 bg-blue-500/10 rounded-full">
-                <Edit3 className="h-4 w-4 text-blue-400" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-white">You edited <span className="font-medium">Contact Form</span></p>
-                <p className="text-xs text-gray-400">2 hours ago</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start gap-3 p-3 bg-gray-800/70 rounded-lg">
-              <div className="p-2 bg-green-500/10 rounded-full">
-                <PlusCircle className="h-4 w-4 text-green-400" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-white">You created <span className="font-medium">Feedback Survey</span></p>
-                <p className="text-xs text-gray-400">Yesterday</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start gap-3 p-3 bg-gray-800/70 rounded-lg">
-              <div className="p-2 bg-purple-500/10 rounded-full">
-                <CheckCircle2 className="h-4 w-4 text-purple-400" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-white">New submission on <span className="font-medium">Registration Form</span></p>
-                <p className="text-xs text-gray-400">2 days ago</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
+        {/* Forms Grid */}
         <div className="mb-6">
-          <h2 className="text-lg font-medium text-white mb-4">Your Forms</h2>
+          <h2 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
+            <FileText className="h-5 w-5 text-blue-400" />
+            Your Forms
+          </h2>
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -774,6 +1105,7 @@ const Dashboard = () => {
           </motion.div>
         </div>
 
+        {/* Empty State */}
         {filteredAndSortedForms.length === 0 && (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -804,6 +1136,7 @@ const Dashboard = () => {
         )}
       </div>
       
+      {/* Footer */}
       <footer className="border-t border-gray-800 py-6 mt-12">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
