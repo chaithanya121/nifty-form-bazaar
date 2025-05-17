@@ -8,6 +8,7 @@ interface FormData {
   id: string;
   name: string;
   submissions?: number;
+  published?: boolean;  // Added this property to fix the type error
 }
 
 const DashboardOverview = () => {
