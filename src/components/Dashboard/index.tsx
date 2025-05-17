@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -330,7 +329,17 @@ const Dashboard = () => {
                 </button>
               </div>
 
-              {authTab === 'signin' ? <SignInForm /> : <SignUpForm />}
+              {authTab === 'signin' ? (
+                <SignInForm onSuccess={() => {
+                  // Handle successful sign in
+                  navigate("/");
+                }} />
+              ) : (
+                <SignUpForm onSuccess={() => {
+                  // Handle successful sign up
+                  navigate("/");
+                }} />
+              )}
             </div>
 
             <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
