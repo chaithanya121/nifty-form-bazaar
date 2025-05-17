@@ -11,6 +11,8 @@ import FormBuilder from "./components/FormBuilder";
 import Dashboard from "@/components/Dashboard";
 import FormSubmission from "@/components/FormSubmission";
 import { AuthProvider, useAuth } from "./hooks/use-auth";
+import { useState } from "react";
+import GetStarted from "./components/GetStarted";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +28,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => {
+  const [showGetStarted, setShowGetStarted] = useState(false);
+  
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -34,6 +38,15 @@ const App = () => {
             <TooltipProvider delayDuration={0}>
               <Header />
               <main className="container mx-auto px-4 py-6 md:py-8">
+                {showGetStarted && (
+                  <GetStarted 
+                    onClose={() => setShowGetStarted(false)} 
+                    onSignUp={() => {
+                      // User will be redirected to sign-up form
+                      setShowGetStarted(false);
+                    }} 
+                  />
+                )}
                 <Routes>
                   <Route path="/" element={<Dashboard />} />
                   <Route 

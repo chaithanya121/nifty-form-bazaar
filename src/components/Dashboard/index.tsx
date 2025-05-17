@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,6 +28,7 @@ import {
   UserPlus,
   FileImage,
   Heading,
+  Play,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { FormConfig } from '@/components/FormBuilder/types';
@@ -63,6 +63,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '@/hooks/use-auth';
 import { SignInForm } from '../auth/SignInForm';
 import { SignUpForm } from '../auth/SignUpForm';
+import DemoVideo from '../DemoVideo';
 
 interface FormData {
   id: string;
@@ -141,6 +142,7 @@ const Dashboard = () => {
   const [sortBy, setSortBy] = useState<'name' | 'date' | 'submissions'>('date');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'archived' | 'published' | 'draft'>('all');
   const [authTab, setAuthTab] = useState<'signin' | 'signup'>('signin');
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, isAuthenticated } = useAuth();
@@ -380,7 +382,7 @@ const Dashboard = () => {
                 className="flex flex-wrap justify-center gap-4 mb-12"
               >
                 <Button 
-                  onClick={() => setAuthTab('signin')}
+                  onClick={() => setAuthTab('signup')}
                   className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 text-white px-8 py-6 rounded-xl text-lg font-medium border-0 shadow-lg hover:shadow-xl transition-all duration-300"
                 >
                   Get Started Free
@@ -388,7 +390,9 @@ const Dashboard = () => {
                 <Button 
                   variant="outline" 
                   className="bg-gray-800/50 text-white border-gray-600 hover:bg-gray-700/50 px-8 py-6 rounded-xl text-lg font-medium shadow-lg transition-all duration-300"
+                  onClick={() => setIsVideoOpen(true)}
                 >
+                  <Play className="mr-2 h-5 w-5" />
                   Watch Demo
                 </Button>
               </motion.div>
@@ -449,12 +453,10 @@ const Dashboard = () => {
 
               {authTab === 'signin' ? (
                 <SignInForm onSuccess={() => {
-                  // Handle successful sign in
                   navigate("/");
                 }} />
               ) : (
                 <SignUpForm onSuccess={() => {
-                  // Handle successful sign up
                   navigate("/");
                 }} />
               )}
@@ -516,7 +518,7 @@ const Dashboard = () => {
                     </div>
                     <div className="p-4">
                       <p className="text-gray-400 mb-4">{template.description}</p>
-                      <Button onClick={() => setAuthTab('signin')} variant="secondary" size="sm" className="w-full">
+                      <Button onClick={() => setAuthTab('signup')} variant="secondary" size="sm" className="w-full">
                         Use Template
                       </Button>
                     </div>
@@ -524,6 +526,9 @@ const Dashboard = () => {
                 ))}
               </div>
             </div>
+            
+            {/* Demo Video Modal */}
+            <DemoVideo open={isVideoOpen} onOpenChange={setIsVideoOpen} />
             
             {/* Testimonials */}
             <div className="w-full py-16 bg-gradient-to-b from-transparent to-gray-800/30 rounded-2xl my-10">
